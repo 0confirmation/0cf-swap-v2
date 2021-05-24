@@ -22,7 +22,7 @@ const SwapToSelection = (props: SwapToProps): JSX.Element => {
 		if (onChange) {
 			onChange(coin);
 		}
-	}, [coin]);
+	}, [coin, onChange]);
 
 	const selections = getTokens(store.wallet.network.name);
 	const handleChange = (event: React.ChangeEvent<{ value: unknown }>) => {
