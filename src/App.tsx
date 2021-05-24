@@ -1,26 +1,36 @@
-import React from 'react';
-import logo from './logo.svg';
 import './App.css';
+import Sidebar from './components/common/Sidebar/Sidebar';
+import Navbar from './components/common/Navbar/Navbar';
+import { Container, CssBaseline, ThemeProvider } from '@material-ui/core';
+import store, { StoreProvider } from './stores/ZeroStore';
+import { MobxRouter, startRouter } from 'mobx-router';
+import routes from './config/routes';
+import { Snackbar } from './components/common/Snackbar';
+import { sushiTheme } from './config/themes';
+
+const theme = sushiTheme;
+
+startRouter(routes, store, {
+	html5history: true, // or false if you want to use hash based routing
+});
 
 function App() {
-  return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
-  );
+	return (
+		<div>
+			<StoreProvider value={store}>
+				<ThemeProvider theme={theme}>
+					<CssBaseline />
+					<Snackbar>
+						<Navbar />
+						<Container maxWidth={false}>
+							<MobxRouter store={store} />
+						</Container>
+						<Sidebar />
+					</Snackbar>
+				</ThemeProvider>
+			</StoreProvider>
+		</div>
+	);
 }
 
 export default App;
