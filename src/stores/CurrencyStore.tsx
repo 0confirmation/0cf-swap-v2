@@ -80,6 +80,14 @@ export default class CurrencyStore {
 		};
 	});
 
+	/* toToken accepts a value, input token and output token name and formatting options
+	 * and returns a string formatted in the requested way.
+	 * @param value = BigNumber of the amount of the fromName token
+	 * @param tokenName = Name of token you want to convert to - TODO: Make token name enum
+	 * @param fromName = Name of token you're converting from
+	 * @param preferredDecimals (optional) = Precision of decimals, defaults to tokenName decimals
+	 * @param noCommas (optional) = defaults to false, set true to return the number formatted with no commas
+	 */
 	public toToken = (
 		value: BigNumber,
 		tokenName: string,

@@ -2,9 +2,10 @@ import React from 'react';
 import { Grid, Typography, TextField } from '@material-ui/core';
 import SwapToSelection from './SwapToSelection';
 import { Theme, makeStyles } from '@material-ui/core/styles';
+import { SUPPORTED_TOKEN_NAMES } from '../../config/constants/tokens';
 
 export interface SwapToProps {
-	onChange: (name: string) => void;
+	onChange: (name: SUPPORTED_TOKEN_NAMES) => void;
 }
 
 const useStyles = makeStyles((theme: Theme) => ({

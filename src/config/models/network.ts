@@ -14,7 +14,7 @@ export type NotifyOptions = {
 };
 
 export interface Network {
-	name: string;
+	name: NETWORK_LIST;
 	networkId: number;
 	fullName: string;
 	tokens: TokenDefinition[];

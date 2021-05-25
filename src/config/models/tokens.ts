@@ -27,17 +27,19 @@ export class Token {
 		this.price = price ? price : new BigNumber(0);
 	}
 
-	// Update the price to the provided amount
 	setPrice = action((price: BigNumber) => {
 		this.price = price;
 	});
 
-	// Amount of tokens received given an amount of bitcoin and optional
-	// gas costs and fees.
+	/* Returns the amount of tokens received less gas and fees (optional)
+	 * @param amount = BigNumber amount of Bitcoin user is providing
+	 * @param gasCost = Estimation of gas cost for the transaction in wei
+	 * @param fees = fees in sats
+	 */
 	valueOut(amount: BigNumber, gasCost?: BigNumber, fees?: BigNumber): string | null {
 		if (!this.store.currency.prices || this.price.eq(0)) return null;
-		const feeAmount = fees || new BigNumber(0);
-		const gasAmount = gasCost || new BigNumber(0);
+		const feeAmount = fees ? fees.dividedBy(1e8) : new BigNumber(0);
+		const gasAmount = gasCost ? gasCost.dividedBy(1e18) : new BigNumber(0);
 
 		const ethPrice: BigNumber = this.store.currency.prices['ethereum']['btc'];
 		const gasInSats: BigNumber = gasAmount.multipliedBy(ethPrice);

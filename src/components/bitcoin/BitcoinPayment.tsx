@@ -130,3 +130,5 @@ export const BitcoinPayment = observer((): JSX.Element => {
 		</>
 	);
 });
+
+export default BitcoinPayment;
