@@ -57,12 +57,6 @@ export const FeeDisplay = observer((props: SwapToProps): JSX.Element => {
 			title: 'Approx. Slippage',
 			description: '0.01%',
 		},
-		{
-			title: 'Estimated Gas Cost',
-			secondaryTitle: `@${gasFee ? gasFee.dividedBy(1e18).toFixed(2) : '-'} gwei`,
-			description: '0.00001 BTC',
-			secondaryDescription: '($5.40)',
-		},
 	];
 
 	const _getFees = () => {
@@ -82,6 +76,16 @@ export const FeeDisplay = observer((props: SwapToProps): JSX.Element => {
 	return (
 		<Paper variant="outlined" className={classes.feePaper}>
 			{_getFees()}
+			{/* We only show the gas fee row if there is a network with a gas fee associated */}
+			{gasFee ? (
+				<FeeRow
+					key="Estimated Gas Cost"
+					title="Estimated Gas Cost"
+					secondaryTitle={`@${gasFee.dividedBy(1e18).toFixed(2)} gwei`}
+					description="0.00001 BTC"
+					secondaryDescription="($5.40)"
+				/>
+			) : null}
 		</Paper>
 	);
 });

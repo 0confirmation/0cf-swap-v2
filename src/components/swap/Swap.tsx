@@ -13,6 +13,7 @@ import SwapTo from './SwapTo';
 import PaymentButton from './PaymentButton';
 import FeeDisplay from './FeeDisplay';
 import StatsDisplay from './StatsDisplay';
+import { BigNumber } from 'bignumber.js';
 
 const useStyles = makeStyles((theme: Theme) => ({
 	mainContainer: {
@@ -56,12 +57,15 @@ export const Swap = observer(() => {
 	const store = useContext(StoreContext);
 	const {
 		wallet: { zero, gasFee },
+		currency: { tokenMap },
 	} = store;
 
 	const btc = getSushiToken(SUPPORTED_TOKEN_NAMES.RENBTC, store);
 	const weth = getSushiToken(SUPPORTED_TOKEN_NAMES.ETH, store);
 
 	const [selectedCoin, setSelectedCoin] = useState(SUPPORTED_TOKEN_NAMES.USDC);
+	const [toAmount, setToAmount] = useState('0');
+	const [fromAmount, setFromAmount] = useState('0');
 	const [route, setRoute] = useState<SushiRoute | undefined>(undefined);
 	console.log('route', route);
 
@@ -99,13 +103,34 @@ export const Swap = observer(() => {
 		}
 	};
 
+	const handleToAmount = async (amount: string) => {
+		setToAmount(amount);
+		// TODO: Subtract fees from toAmount, convert to BTC and populate fromAmount
+		const token = tokenMap ? tokenMap[selectedCoin.toLowerCase()] : null;
+		if (token) {
+			const value = token.valueIn(new BigNumber(amount));
+			if (value) setFromAmount(value);
+		}
+	};
+
+	const handleFromAmount = async (amount: string) => {
+		setFromAmount(amount);
+		const token = tokenMap ? tokenMap[selectedCoin.toLowerCase()] : null;
+		console.log('check', token, tokenMap, selectedCoin);
+		if (token) {
+			// TODO: add in fees here - investigate using sushiswap SDK to get correct estimated amount
+			const value = token.valueOut(new BigNumber(amount));
+			if (value) setToAmount(value);
+		}
+	};
+
 	return (
 		<Container className={classes.mainContainer}>
 			<Grid item className={classes.swapContainer}>
 				<Grid item xs={12} sm={8} md={6}>
 					<Paper className={classes.infoPaper}>
-						<SwapFrom />
-						<SwapTo onChange={handleSelectedCoin} />
+						<SwapFrom amount={fromAmount} handleFromAmount={handleFromAmount} />
+						<SwapTo onTokenChange={handleSelectedCoin} amount={toAmount} handleToAmount={handleToAmount} />
 						<PaymentButton />
 						<FeeDisplay selectedCoin={selectedCoin} gasFee={gasFee} />
 					</Paper>

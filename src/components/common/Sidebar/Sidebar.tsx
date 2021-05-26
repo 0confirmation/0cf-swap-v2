@@ -80,9 +80,7 @@ export const Sidebar = observer(() => {
 			<Toolbar>
 				<Grid container direction="column">
 					<Logo />
-					{collapsedHeader ? (
-						<></>
-					) : (
+					{collapsedHeader ? null : (
 						<Grid className={classes.walletButton}>
 							<WalletButton />
 						</Grid>

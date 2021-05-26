@@ -100,3 +100,25 @@ export const toCurrency = (
 
 	return `${prefix}${fixedNormal}${suffix}`;
 };
+
+/* Takes an input value and the old value and performs type coercion from string to
+ * a BigNumber.  If it's not a valid input, returns the old value.
+ * @param newValue = String input from an onChange event
+ * @param oldValue = Previous value to revert to if an invalid input
+ */
+export const coerceInputToNumber = (newValue: string, oldValue: string) => {
+	// Format to add a leading zero in front of decimals
+	if (newValue === '.') newValue = '0.';
+
+	// Format to remove leading zeros
+	if (newValue.length >= 2 && newValue[0] === '0' && newValue[1] !== '.') newValue = newValue.substring(1);
+
+	if (newValue === '') {
+		return '0';
+	}
+	if (isNaN(newValue as unknown as number)) {
+		return oldValue;
+	} else {
+		return newValue;
+	}
+};

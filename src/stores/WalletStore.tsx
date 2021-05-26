@@ -73,6 +73,7 @@ export default class WalletStore {
 
 	disconnect = action(() => {
 		this.connectedAddress = '';
+		this.gasFee = undefined;
 		this.zero = undefined;
 		this.onboard.walletReset();
 		if (this.gasInterval) clearInterval(this.gasInterval);
@@ -92,12 +93,13 @@ export default class WalletStore {
 	private async _gasnowPrices(): Promise<BigNumber> {
 		const prices = await fetch('https://www.gasnow.org/api/v3/gas/price?utm_source=badgerv2');
 		const result = await prices.json();
-		console.log('prices:', result);
+		// keepers use 'Fast' gas prices to handle transactions, so we only are interested in this.
 		return new BigNumber(result.data['fast']).multipliedBy(1e9);
 	}
 
 	/* Pulls data for the current network and sets the gas fee to
-	 * the appropriate amount, stored in wei
+	 * the appropriate amount, stored in wei.  We poll this every 8
+	 * seconds per gasNow's standard updates.
 	 */
 	setGasFees = action(() => {
 		switch (this.network.name) {

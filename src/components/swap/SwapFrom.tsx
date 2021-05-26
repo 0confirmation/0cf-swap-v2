@@ -3,6 +3,12 @@ import { Grid, Typography, TextField } from '@material-ui/core';
 import { Theme, makeStyles } from '@material-ui/core/styles';
 import { Icon } from '@iconify/react';
 import btcIcon from '@iconify/icons-cryptocurrency/btc';
+import { coerceInputToNumber } from '../../utils/helpers';
+
+export interface SwapToProps {
+	amount: string;
+	handleFromAmount: (amount: string) => void;
+}
 
 const useStyles = makeStyles((theme: Theme) => ({
 	inputContainer: {
@@ -42,8 +48,13 @@ const useStyles = makeStyles((theme: Theme) => ({
 	},
 }));
 
-const SwapTo = () => {
+const SwapTo = (props: SwapToProps) => {
 	const classes = useStyles();
+	const { amount, handleFromAmount } = props;
+
+	const handleChange = (event: React.ChangeEvent<{ value: unknown }>) => {
+		handleFromAmount(coerceInputToNumber(event.target.value as string, amount));
+	};
 
 	return (
 		<Grid container className={classes.inputContainer}>
@@ -59,6 +70,8 @@ const SwapTo = () => {
 				</Grid>
 				<Grid item xs={5}>
 					<TextField
+						value={amount}
+						onChange={handleChange}
 						InputProps={{
 							classes: {
 								input: classes.inputText,

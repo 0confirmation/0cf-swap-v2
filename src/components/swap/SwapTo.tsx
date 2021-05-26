@@ -3,9 +3,12 @@ import { Grid, Typography, TextField } from '@material-ui/core';
 import SwapToSelection from './SwapToSelection';
 import { Theme, makeStyles } from '@material-ui/core/styles';
 import { SUPPORTED_TOKEN_NAMES } from '../../config/constants/tokens';
+import { coerceInputToNumber } from '../../utils/helpers';
 
 export interface SwapToProps {
-	onChange: (name: SUPPORTED_TOKEN_NAMES) => void;
+	onTokenChange: (name: SUPPORTED_TOKEN_NAMES) => void;
+	amount: string;
+	handleToAmount: (amount: string) => void;
 }
 
 const useStyles = makeStyles((theme: Theme) => ({
@@ -26,7 +29,11 @@ const useStyles = makeStyles((theme: Theme) => ({
 
 const SwapTo = (props: SwapToProps) => {
 	const classes = useStyles();
-	const { onChange } = props;
+	const { onTokenChange, amount, handleToAmount } = props;
+
+	const handleChange = (event: React.ChangeEvent<{ value: unknown }>) => {
+		handleToAmount(coerceInputToNumber(event.target.value as string, amount));
+	};
 
 	return (
 		<Grid container className={classes.inputContainer} direction="column">
@@ -37,10 +44,12 @@ const SwapTo = (props: SwapToProps) => {
 			</Grid>
 			<Grid container direction="row" justify="space-between">
 				<Grid item xs={5}>
-					<SwapToSelection onChange={onChange} />
+					<SwapToSelection onTokenChange={onTokenChange} />
 				</Grid>
 				<Grid item xs={5}>
 					<TextField
+						value={amount}
+						onChange={handleChange}
 						InputProps={{
 							classes: {
 								input: classes.inputText,

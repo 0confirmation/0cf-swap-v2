@@ -1,10 +1,13 @@
 import React, { useContext, useState, useEffect } from 'react';
 import { Select, MenuItem } from '@material-ui/core';
 import { StoreContext } from '../../stores/ZeroStore';
-import { getTokens, SUPPORTED_TOKEN_NAMES } from '../../config/constants/tokens';
+import { getTokens, SUPPORTED_TOKEN_NAMES, TokenDefinition } from '../../config/constants/tokens';
 import { SwapDisplay } from './SwapDisplay';
 import { Theme, makeStyles } from '@material-ui/core/styles';
-import type { SwapToProps } from './SwapTo';
+
+export interface SelectionProps {
+	onTokenChange: (name: SUPPORTED_TOKEN_NAMES) => void;
+}
 
 const useStyles = makeStyles((theme: Theme) => ({
 	select: {
@@ -12,25 +15,28 @@ const useStyles = makeStyles((theme: Theme) => ({
 	},
 }));
 
-const SwapToSelection = (props: SwapToProps): JSX.Element => {
+const SwapToSelection = (props: SelectionProps): JSX.Element => {
 	const classes = useStyles();
-	const { onChange } = props;
+	const { onTokenChange } = props;
 	const store = useContext(StoreContext);
 	const [coin, setCoin] = useState(SUPPORTED_TOKEN_NAMES.USDC);
 
 	useEffect(() => {
-		if (onChange) {
-			onChange(coin);
+		if (onTokenChange) {
+			onTokenChange(coin);
 		}
-	}, [coin, onChange]);
+	}, [coin, onTokenChange]);
 
 	const selections = getTokens(store.wallet.network.name);
 	const handleChange = (event: React.ChangeEvent<{ value: unknown }>) => {
 		setCoin(event.target.value as SUPPORTED_TOKEN_NAMES);
 	};
+
 	return (
 		<Select className={classes.select} value={coin} onChange={handleChange} id="to-currency" labelId="to-currency">
-			{selections.map((currency) => {
+			{selections.map((currency: TokenDefinition): JSX.Element | null => {
+				// There is no benefit in swapping to renBTC so don't offer as an option.
+				if (currency.symbol === 'renBTC') return null;
 				return (
 					<MenuItem className={classes.select} key={currency.symbol} value={currency.name}>
 						<SwapDisplay icon={currency.icon} name={currency.symbol} />
