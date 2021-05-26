@@ -5,6 +5,7 @@ import { Theme, makeStyles } from '@material-ui/core/styles';
 
 export interface FeeRowProps {
 	title: string;
+	secondaryTitle?: string;
 	description: string;
 	secondaryDescription?: string;
 }
@@ -32,12 +33,17 @@ const useStyles = makeStyles((theme: Theme) => ({
 
 export const FeeRow = observer((props: FeeRowProps) => {
 	const classes = useStyles();
-	const { title, description, secondaryDescription } = props;
+	const { title, secondaryTitle, description, secondaryDescription } = props;
 
 	return (
 		<Grid container direction="row" className={classes.feeRow}>
 			<Grid item xs={4} className={classes.feeInfoLeft}>
-				{title}
+				<div className={classes.feeInfoTextHeader}>{title}</div>
+				{secondaryTitle ? (
+					<Typography variant="caption" color="textSecondary">
+						{secondaryTitle}
+					</Typography>
+				) : null}
 			</Grid>
 			<Grid item xs={8} className={classes.feeInfoRight}>
 				<Typography className={classes.feeInfoTextHeader}>{description}</Typography>

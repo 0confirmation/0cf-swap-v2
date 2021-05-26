@@ -1,15 +1,17 @@
-import { Container, Grid, Paper } from '@material-ui/core';
 import React, { useContext, useEffect, useState } from 'react';
+import { Grid, Container, Paper } from '@material-ui/core';
 import { DRAWER_WIDTH } from '../../config/constants/ui';
 import { navHeight } from '../common/Navbar/Navbar';
 import { Theme, makeStyles } from '@material-ui/core/styles';
-import SwapTo from './SwapTo';
-import SwapFrom from './SwapFrom';
 import { StoreContext } from '../../stores/ZeroStore';
 import { observer } from 'mobx-react-lite';
-import { FeeDisplay } from './FeeDisplay';
 import { SUPPORTED_TOKEN_NAMES } from '../../config/constants/tokens';
+import { Route as SushiRoute, Pair, TokenAmount, Trade, TradeType } from '@sushiswap/sdk';
+import { getSushiToken } from '../../config/constants/tokens';
+import SwapFrom from './SwapFrom';
+import SwapTo from './SwapTo';
 import PaymentButton from './PaymentButton';
+import FeeDisplay from './FeeDisplay';
 import StatsDisplay from './StatsDisplay';
 
 const useStyles = makeStyles((theme: Theme) => ({
@@ -53,8 +55,15 @@ export const Swap = observer(() => {
 	const classes = useStyles();
 	const store = useContext(StoreContext);
 	const {
-		wallet: { zero },
+		wallet: { zero, gasFee },
 	} = store;
+
+	const btc = getSushiToken(SUPPORTED_TOKEN_NAMES.RENBTC, store);
+	const weth = getSushiToken(SUPPORTED_TOKEN_NAMES.ETH, store);
+
+	const [selectedCoin, setSelectedCoin] = useState(SUPPORTED_TOKEN_NAMES.USDC);
+	const [route, setRoute] = useState<SushiRoute | undefined>(undefined);
+	console.log('route', route);
 
 	/* On change of the zero class, check if the user is connected
 	 * if so, set an interval to regularly update the liquidity
@@ -71,11 +80,24 @@ export const Swap = observer(() => {
 		}
 	}, [zero]);
 
-	const handleSelectedCoin = (name: SUPPORTED_TOKEN_NAMES) => {
+	const handleSelectedCoin = async (name: SUPPORTED_TOKEN_NAMES) => {
 		setSelectedCoin(name);
-	};
+		/* TODO: Finish sushi SDK */
+		const want = getSushiToken(name, store);
 
-	const [selectedCoin, setSelectedCoin] = useState(SUPPORTED_TOKEN_NAMES.USDC);
+		if (!!btc && !!weth && !!want) {
+			const newRoute = new SushiRoute(
+				[
+					new Pair(new TokenAmount(btc, '100000000'), new TokenAmount(weth, '1000000000000000000')),
+					new Pair(new TokenAmount(want, '100000000'), new TokenAmount(weth, '1000000000000000000')),
+				],
+				btc,
+			);
+			setRoute(newRoute);
+			const trade = new Trade(newRoute, new TokenAmount(want, '100000000'), TradeType.EXACT_INPUT);
+			console.log('trade:', trade);
+		}
+	};
 
 	return (
 		<Container className={classes.mainContainer}>
@@ -85,7 +107,7 @@ export const Swap = observer(() => {
 						<SwapFrom />
 						<SwapTo onChange={handleSelectedCoin} />
 						<PaymentButton />
-						<FeeDisplay selectedCoin={selectedCoin} />
+						<FeeDisplay selectedCoin={selectedCoin} gasFee={gasFee} />
 					</Paper>
 				</Grid>
 			</Grid>

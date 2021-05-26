@@ -25,11 +25,12 @@ interface SidebarListItemProps {
 	title: string;
 	view: Route<ZeroStore> | undefined;
 	url: string | undefined;
+	disabled: boolean;
 }
 
 export const SidebarListItem = (props: SidebarListItemProps): JSX.Element => {
 	const classes = useStyles();
-	const { title, view, url } = props;
+	const { title, view, url, disabled } = props;
 	const store = useContext(StoreContext);
 	const { goTo } = store.router;
 	const { collapsedHeader, toggleSidebar } = store.ui;
@@ -49,6 +50,7 @@ export const SidebarListItem = (props: SidebarListItemProps): JSX.Element => {
 
 	return (
 		<ListItem
+			disabled={disabled}
 			button
 			className={classes.listButton}
 			key={title}

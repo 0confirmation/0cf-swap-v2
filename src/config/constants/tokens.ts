@@ -1,8 +1,11 @@
 import usdcIcon from '@iconify/icons-cryptocurrency/usdc';
 import daiIcon from '@iconify/icons-cryptocurrency/dai';
 import ethIcon from '@iconify/icons-cryptocurrency/eth';
+import btcIcon from '@iconify/icons-cryptocurrency/btc';
 import type { IconifyIcon } from '@iconify/react';
 import { NETWORK_LIST } from './network';
+import { Token as SushiToken } from '@sushiswap/sdk';
+import { ZeroStore } from '../../stores/ZeroStore';
 
 export interface TokenDefinition {
 	name: SUPPORTED_TOKEN_NAMES;
@@ -16,6 +19,7 @@ export enum SUPPORTED_TOKEN_NAMES {
 	USDC = 'USD-Coin',
 	DAI = 'DAI',
 	ETH = 'Ethereum',
+	RENBTC = 'RenBTC',
 }
 
 const ethTokens: TokenDefinition[] = [
@@ -41,6 +45,13 @@ const ethTokens: TokenDefinition[] = [
 		decimals: 18,
 		icon: ethIcon as unknown as IconifyIcon,
 	},
+	{
+		name: SUPPORTED_TOKEN_NAMES.RENBTC,
+		symbol: 'renBTC',
+		address: '0xEB4C2781e4ebA804CE9a9803C67d0893436bB27D',
+		decimals: 8,
+		icon: btcIcon as unknown as IconifyIcon,
+	},
 ];
 
 /* Returns a list of token definitions based on the input network
@@ -51,4 +62,16 @@ export const getTokens = (network?: NETWORK_LIST): TokenDefinition[] => {
 		default:
 			return ethTokens;
 	}
+};
+
+/* Returns a Sushiswap formatted token based on a token definition name
+ * @param token = Token name on the supported token list
+ */
+export const getSushiToken = (tokenName: SUPPORTED_TOKEN_NAMES, store: ZeroStore): SushiToken | undefined => {
+	const { tokenMap } = store.currency;
+	const token = tokenMap ? tokenMap[tokenName] : null;
+
+	return token
+		? new SushiToken(store.wallet.network.networkId, token.address, token.decimals, token.symbol, token.name)
+		: undefined;
 };

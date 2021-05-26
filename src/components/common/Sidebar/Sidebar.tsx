@@ -44,8 +44,8 @@ const useStyles = makeStyles((theme: Theme) =>
 );
 
 const mainSidebarLinks = [
-	{ title: 'Swap', view: views.home, url: undefined },
-	{ title: 'Earn', view: views.earn, url: undefined },
+	{ title: 'Swap', view: views.home, url: undefined, disabled: false },
+	{ title: 'Earn', view: views.earn, url: undefined, disabled: true },
 ];
 
 const secondarySidebarLinks = [
@@ -53,15 +53,17 @@ const secondarySidebarLinks = [
 		title: 'Sushiswap',
 		view: undefined,
 		url: 'https://sushiswap.com/',
+		disabled: false,
 	},
 	{
 		title: '0confirmation',
 		view: undefined,
 		url: 'https://0confirmation.com/',
+		disabled: false,
 	},
-	{ title: 'Docs', url: 'https://docs.0confirmation.com/' },
+	{ title: 'Docs', view: undefined, url: 'https://docs.0confirmation.com/', disabled: false },
 	//TODO: Make contact dropdown with socials links
-	{ title: 'Contact', view: undefined, url: '_blank' },
+	{ title: 'Contact', view: undefined, url: '_blank', disabled: true },
 ];
 
 export const Sidebar = observer(() => {
@@ -96,6 +98,7 @@ export const Sidebar = observer(() => {
 							title={linkInfo.title}
 							view={linkInfo.view}
 							url={linkInfo.url}
+							disabled={linkInfo.disabled}
 						/>
 					))}
 				</List>
@@ -106,6 +109,7 @@ export const Sidebar = observer(() => {
 							title={linkInfo.title}
 							view={linkInfo.view}
 							url={linkInfo.url}
+							disabled={linkInfo.disabled}
 						/>
 					))}
 				</List>

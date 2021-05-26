@@ -10,18 +10,14 @@ export const getNetwork = (network?: string): Network => {
 	}
 };
 
-export const getNetworkId = (network?: string): number => {
+export const getNetworkId = (network: string): number | undefined => {
 	switch (network) {
 		case NETWORK_LIST.BSC:
 			return 56;
-		// case NETWORK_LIST.XDAI:
-		// 	return 100;
-		// case NETWORK_LIST.FTM:
-		// 	return 250;
-		// case NETWORK_LIST.MATIC:
-		// 	return 137;
-		default:
+		case NETWORK_LIST.ETH:
 			return 1;
+		default:
+			return undefined;
 	}
 };
 

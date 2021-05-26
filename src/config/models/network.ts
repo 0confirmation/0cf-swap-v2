@@ -1,10 +1,10 @@
 import { NETWORK_LIST, NETWORK_IDS } from '../constants/network';
 import { getTokens, TokenDefinition } from '../constants/tokens';
+const RenJS = require('@0confirmation/sdk/renvm');
 
 export type NetworkConstants = {
 	[index: string]: {
-		APP_URL: string;
-		RPC_URL: string;
+		[key: string]: string;
 	};
 };
 
@@ -25,6 +25,7 @@ export class EthNetwork implements Network {
 	readonly networkId = NETWORK_IDS.ETH;
 	readonly fullName = 'Ethereum';
 	public tokens = getTokens(NETWORK_LIST.ETH);
+	public renJS = new RenJS('mainnet');
 }
 
 export class BscNetwork implements Network {

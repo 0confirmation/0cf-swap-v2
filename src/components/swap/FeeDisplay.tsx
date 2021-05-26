@@ -5,16 +5,11 @@ import { observer } from 'mobx-react-lite';
 import BigNumber from 'bignumber.js';
 import { StoreContext } from '../../stores/ZeroStore';
 import { SUPPORTED_TOKEN_NAMES } from '../../config/constants/tokens';
-import FeeRow from './FeeRow';
+import FeeRow, { FeeRowProps } from './FeeRow';
 
 export interface SwapToProps {
 	selectedCoin: SUPPORTED_TOKEN_NAMES;
-}
-
-export interface FeeRowDetails {
-	title: string;
-	description: string;
-	secondaryDescription?: string;
+	gasFee: BigNumber | undefined;
 }
 
 const useStyles = makeStyles((theme: Theme) => ({
@@ -44,9 +39,9 @@ export const FeeDisplay = observer((props: SwapToProps): JSX.Element => {
 	const {
 		currency: { toToken },
 	} = store;
-	const { selectedCoin } = props;
+	const { selectedCoin, gasFee } = props;
 
-	const feeInfo: FeeRowDetails[] = [
+	const feeInfo: FeeRowProps[] = [
 		{
 			title: 'Rate',
 			description: `1 BTC = ${toToken(new BigNumber(1), selectedCoin.toLowerCase(), 'bitcoin', 2)}${' '} ${
@@ -64,17 +59,19 @@ export const FeeDisplay = observer((props: SwapToProps): JSX.Element => {
 		},
 		{
 			title: 'Estimated Gas Cost',
+			secondaryTitle: `@${gasFee ? gasFee.dividedBy(1e18).toFixed(2) : '-'} gwei`,
 			description: '0.00001 BTC',
 			secondaryDescription: '($5.40)',
 		},
 	];
 
 	const _getFees = () => {
-		return feeInfo.map((fee: FeeRowDetails): JSX.Element => {
+		return feeInfo.map((fee: FeeRowProps): JSX.Element => {
 			return (
 				<FeeRow
 					key={fee.title}
 					title={fee.title}
+					secondaryTitle={fee.secondaryTitle}
 					description={fee.description}
 					secondaryDescription={fee.secondaryDescription ? fee.secondaryDescription : undefined}
 				/>
@@ -88,3 +85,5 @@ export const FeeDisplay = observer((props: SwapToProps): JSX.Element => {
 		</Paper>
 	);
 });
+
+export default FeeDisplay;
