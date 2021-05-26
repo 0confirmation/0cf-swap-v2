@@ -86,6 +86,7 @@ export const Swap = observer(() => {
 
 	const handleSelectedCoin = async (name: SUPPORTED_TOKEN_NAMES) => {
 		setSelectedCoin(name);
+		handleFromAmount(fromAmount);
 		/* TODO: Finish sushi SDK */
 		const want = getSushiToken(name, store);
 
