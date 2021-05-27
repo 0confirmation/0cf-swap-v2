@@ -1,6 +1,6 @@
 import { NETWORK_LIST, NETWORK_IDS } from '../constants/network';
 import { getTokens, TokenDefinition } from '../constants/tokens';
-const RenJS = require('@0confirmation/sdk/renvm');
+import RenJS from '@renproject/ren';
 
 export type NetworkConstants = {
 	[index: string]: {
@@ -18,6 +18,7 @@ export interface Network {
 	networkId: number;
 	fullName: string;
 	tokens: TokenDefinition[];
+	renJS: RenJS;
 }
 
 export class EthNetwork implements Network {
@@ -33,4 +34,5 @@ export class BscNetwork implements Network {
 	readonly networkId = NETWORK_IDS.BSC;
 	readonly fullName = 'Binance Smart Chain';
 	public tokens = getTokens(NETWORK_LIST.ETH);
+	public renJS = new RenJS('bscMainnet');
 }

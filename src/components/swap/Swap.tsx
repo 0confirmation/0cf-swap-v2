@@ -21,6 +21,12 @@ const useStyles = makeStyles((theme: Theme) => ({
 			paddingLeft: DRAWER_WIDTH + 48,
 		},
 		paddingTop: `${navHeight + 1.5}rem`,
+		[theme.breakpoints.down('sm')]: {
+			marginLeft: '8px',
+			marginRight: '8px',
+			paddingLeft: 0,
+			paddingRight: 0,
+		},
 	},
 	swapContainer: {
 		paddingBottom: theme.spacing(6),
@@ -56,7 +62,8 @@ export const Swap = observer(() => {
 	const classes = useStyles();
 	const store = useContext(StoreContext);
 	const {
-		wallet: { zero, gasFee },
+		wallet: { zero },
+		fees: { gasFee },
 		currency: { tokenMap },
 	} = store;
 
@@ -128,7 +135,7 @@ export const Swap = observer(() => {
 	return (
 		<Container className={classes.mainContainer}>
 			<Grid item className={classes.swapContainer}>
-				<Grid item xs={12} sm={8} md={6}>
+				<Grid item xs={12} sm={8}>
 					<Paper className={classes.infoPaper}>
 						<SwapFrom amount={fromAmount} handleFromAmount={handleFromAmount} />
 						<SwapTo onTokenChange={handleSelectedCoin} amount={toAmount} handleToAmount={handleToAmount} />

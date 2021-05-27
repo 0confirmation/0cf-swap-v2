@@ -23,7 +23,11 @@ const useStyles = makeStyles((theme: Theme) => ({
 		color: theme.palette.text.primary,
 	},
 	inputText: {
-		fontSize: '1.65rem',
+		fontSize: '1.5rem',
+		[theme.breakpoints.down('xs')]: {
+			fontSize: '1rem',
+			marginTop: 'auto',
+		},
 	},
 }));
 

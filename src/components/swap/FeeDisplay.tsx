@@ -1,5 +1,6 @@
 import React, { useContext } from 'react';
 import { Theme, makeStyles } from '@material-ui/core/styles';
+import { Typography } from '@material-ui/core';
 import { Paper } from '@material-ui/core';
 import { observer } from 'mobx-react-lite';
 import BigNumber from 'bignumber.js';
@@ -37,9 +38,11 @@ export const FeeDisplay = observer((props: SwapToProps): JSX.Element => {
 	const classes = useStyles();
 	const store = useContext(StoreContext);
 	const {
+		wallet: { connectedAddress },
 		currency: { toToken },
+		fees: { gasFee, mintFee },
 	} = store;
-	const { selectedCoin, gasFee } = props;
+	const { selectedCoin } = props;
 
 	const feeInfo: FeeRowProps[] = [
 		{
@@ -47,15 +50,26 @@ export const FeeDisplay = observer((props: SwapToProps): JSX.Element => {
 			description: `1 BTC = ${toToken(new BigNumber(1), selectedCoin.toLowerCase(), 'bitcoin', 2)}${' '} ${
 				store.currency.tokenMap![selectedCoin.toLowerCase()].symbol
 			}`,
+			collapsable: false,
 		},
 		{
 			title: 'Protocol Fees',
+			secondaryTitle: [`${mintFee}% renVM Mint`, '0.1% Zero Loan'],
 			description: '0.00042 BTC',
 			secondaryDescription: '($226.01)',
+			collapsable: true,
 		},
 		{
 			title: 'Approx. Slippage',
 			description: '0.01%',
+			collapsable: false,
+		},
+		{
+			title: 'Estimated Gas Cost',
+			secondaryTitle: [`@${gasFee ? gasFee.dividedBy(1e18).toFixed(2) : '-'} gwei`],
+			description: '0.00001 BTC',
+			secondaryDescription: '($5.40)',
+			collapsable: false,
 		},
 	];
 
@@ -68,6 +82,7 @@ export const FeeDisplay = observer((props: SwapToProps): JSX.Element => {
 					secondaryTitle={fee.secondaryTitle}
 					description={fee.description}
 					secondaryDescription={fee.secondaryDescription ? fee.secondaryDescription : undefined}
+					collapsable={fee.collapsable}
 				/>
 			);
 		});
@@ -75,17 +90,12 @@ export const FeeDisplay = observer((props: SwapToProps): JSX.Element => {
 
 	return (
 		<Paper variant="outlined" className={classes.feePaper}>
-			{_getFees()}
 			{/* We only show the gas fee row if there is a network with a gas fee associated */}
-			{gasFee ? (
-				<FeeRow
-					key="Estimated Gas Cost"
-					title="Estimated Gas Cost"
-					secondaryTitle={`@${gasFee.dividedBy(1e18).toFixed(2)} gwei`}
-					description="0.00001 BTC"
-					secondaryDescription="($5.40)"
-				/>
-			) : null}
+			{connectedAddress ? (
+				_getFees()
+			) : (
+				<Typography variant="h6">Connect Wallet to see transaction details</Typography>
+			)}
 		</Paper>
 	);
 });
