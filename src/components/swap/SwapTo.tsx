@@ -13,10 +13,16 @@ export interface SwapToProps {
 
 const useStyles = makeStyles((theme: Theme) => ({
 	inputContainer: {
-		paddingTop: theme.spacing(3),
-		paddingBottom: theme.spacing(3),
+		paddingTop: theme.spacing(1),
+		paddingBottom: theme.spacing(2),
 		paddingLeft: theme.spacing(1),
 		paddingRight: theme.spacing(1),
+		marginTop: theme.spacing(4),
+		marginBottom: theme.spacing(2),
+		// Reason: typescript doesn't allow for custom classes on material-ui
+		// @ts-ignore
+		backgroundColor: theme.palette.custom.raisedPaper,
+		borderRadius: '.625rem',
 	},
 	inputDecorationText: {
 		fontWeight: 'bold',

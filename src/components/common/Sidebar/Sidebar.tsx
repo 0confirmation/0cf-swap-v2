@@ -19,11 +19,11 @@ const useStyles = makeStyles((theme: Theme) =>
 		},
 		drawerPaper: {
 			width: DRAWER_WIDTH,
-			backgroundColor: '#191932',
+			backgroundColor: theme.palette.background.paper,
 		},
 		drawerContainer: {
 			display: 'flex',
-			backgroundColor: '#191932',
+			backgroundColor: theme.palette.background.paper,
 			flexDirection: 'column',
 			justifyContent: 'space-between',
 			height: '100%',

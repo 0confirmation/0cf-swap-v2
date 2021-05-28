@@ -7,10 +7,11 @@ import BigNumber from 'bignumber.js';
 import { StoreContext } from '../../stores/ZeroStore';
 import { SUPPORTED_TOKEN_NAMES } from '../../config/constants/tokens';
 import FeeRow, { FeeRowProps } from './FeeRow';
+import { FeeDescription } from '../../config/models/currency';
 
 export interface SwapToProps {
 	selectedCoin: SUPPORTED_TOKEN_NAMES;
-	gasFee: BigNumber | undefined;
+	gasFee: FeeDescription;
 }
 
 const useStyles = makeStyles((theme: Theme) => ({
@@ -54,7 +55,7 @@ export const FeeDisplay = observer((props: SwapToProps): JSX.Element => {
 		},
 		{
 			title: 'Protocol Fees',
-			secondaryTitle: [`${mintFee}% renVM Mint`, '0.1% Zero Loan'],
+			secondaryTitle: [`${mintFee.scalar}% renVM Mint`, '0.1% Zero Loan'],
 			description: '0.00042 BTC',
 			secondaryDescription: '($226.01)',
 			collapsable: true,
@@ -66,7 +67,7 @@ export const FeeDisplay = observer((props: SwapToProps): JSX.Element => {
 		},
 		{
 			title: 'Estimated Gas Cost',
-			secondaryTitle: [`@${gasFee ? gasFee.dividedBy(1e18).toFixed(2) : '-'} gwei`],
+			secondaryTitle: [`@${gasFee.scalar ? gasFee.scalar.dividedBy(1e18).toFixed(2) : '-'} gwei`],
 			description: '0.00001 BTC',
 			secondaryDescription: '($5.40)',
 			collapsable: false,

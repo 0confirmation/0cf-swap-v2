@@ -12,10 +12,15 @@ export interface SwapToProps {
 
 const useStyles = makeStyles((theme: Theme) => ({
 	inputContainer: {
-		paddingTop: theme.spacing(3),
-		paddingBottom: theme.spacing(3),
+		paddingTop: theme.spacing(1),
+		paddingBottom: theme.spacing(2),
 		paddingLeft: theme.spacing(1),
 		paddingRight: theme.spacing(1),
+		marginTop: theme.spacing(1.5),
+		// Reason: typescript doesn't allow for custom classes on material-ui
+		// @ts-ignore
+		backgroundColor: theme.palette.custom.raisedPaper,
+		borderRadius: '.625rem',
 	},
 	inputDecorationText: {
 		fontWeight: 'bold',
@@ -57,7 +62,7 @@ const SwapTo = (props: SwapToProps) => {
 	};
 
 	return (
-		<Grid container className={classes.inputContainer}>
+		<Grid container className={classes.inputContainer} justify="flex-end" direction="column">
 			<Typography variant="caption" className={classes.inputDecorationText}>
 				FROM
 			</Typography>

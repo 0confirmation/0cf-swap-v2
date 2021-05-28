@@ -69,7 +69,7 @@ export default class WalletStore {
 
 	disconnect = action(() => {
 		this.connectedAddress = '';
-		this.store.fees.gasFee = undefined;
+		this.store.fees.clearFees();
 		this.zero = undefined;
 		this.onboard.walletReset();
 	});

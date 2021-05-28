@@ -17,8 +17,10 @@ import { BigNumber } from 'bignumber.js';
 
 const useStyles = makeStyles((theme: Theme) => ({
 	mainContainer: {
+		background: 'radial-gradient(circle at 50%, #121A31, #0d0415 50%)',
 		[theme.breakpoints.up('md')]: {
 			paddingLeft: DRAWER_WIDTH + 48,
+			background: 'radial-gradient(circle at 60%, #121A31, #0d0415 50%)',
 		},
 		paddingTop: `${navHeight + 1.5}rem`,
 		[theme.breakpoints.down('sm')]: {
@@ -124,7 +126,6 @@ export const Swap = observer(() => {
 	const handleFromAmount = async (amount: string) => {
 		setFromAmount(amount);
 		const token = tokenMap ? tokenMap[selectedCoin.toLowerCase()] : null;
-		console.log('check', token, tokenMap, selectedCoin);
 		if (token) {
 			// TODO: add in fees here - investigate using sushiswap SDK to get correct estimated amount
 			const value = token.valueOut(new BigNumber(amount));

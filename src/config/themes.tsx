@@ -28,8 +28,12 @@ export const sushiTheme = createMuiTheme({
 			primary: '#FFFFFF',
 		},
 		background: {
-			paper: '#191932',
-			default: '#0D0E20',
+			paper: 'rgba(22, 21, 34, 1)',
+			default: 'rgb(13, 4, 21)',
+		},
+		//@ts-ignore
+		custom: {
+			raisedPaper: 'rgba(32, 34, 49, 1) !important',
 		},
 	},
 });

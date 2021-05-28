@@ -15,3 +15,7 @@ export type ExchangeRateDetail = {
 export type ExchangeRates = {
 	rates: { [id: string]: ExchangeRateDetail };
 };
+export type FeeDescription = {
+	value: BigNumber | undefined;
+	scalar: BigNumber | undefined;
+};

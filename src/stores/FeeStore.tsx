@@ -2,18 +2,21 @@ import type { ZeroStore } from './ZeroStore';
 import BigNumber from 'bignumber.js';
 import { NETWORK_LIST } from '../config/constants/network';
 import { action, extendObservable } from 'mobx';
+import { FeeDescription } from '../config/models/currency';
 
 export default class FeeStore {
 	private readonly store!: ZeroStore;
 	private gasInterval: NodeJS.Timeout | undefined;
-	public gasFee: BigNumber | undefined;
-	public mintFee: BigNumber | undefined;
+	public gasFee: FeeDescription;
+	public mintFee: FeeDescription;
 
 	constructor(store: ZeroStore) {
 		this.store = store;
+		this.gasFee = { value: undefined, scalar: undefined };
+		this.mintFee = { value: undefined, scalar: undefined };
 		extendObservable(this, {
-			gasFee: undefined,
-			mintFee: undefined,
+			gasFee: { value: undefined, bips: undefined },
+			mintFee: { value: undefined, bips: undefined },
 		});
 	}
 
@@ -43,17 +46,31 @@ export default class FeeStore {
 		switch (this.store.wallet.network.name) {
 			case NETWORK_LIST.ETH:
 				this._gasnowPrices().then((value: BigNumber) => {
-					this.gasFee = value;
+					this.gasFee.scalar = value;
 				});
 				this._getRenMintFee().then((value: BigNumber) => {
-					this.mintFee = value;
+					this.mintFee.scalar = value;
 				});
 				this.gasInterval = setInterval(() => {
 					this._gasnowPrices().then((value: BigNumber) => {
-						this.gasFee = value;
+						this.gasFee.scalar = value;
 					});
 				}, 1000 * 8);
 		}
+	});
+
+	/* Clear all fees and intervals.
+	 */
+	clearFees = action(() => {
+		this.gasFee = {
+			value: undefined,
+			scalar: undefined,
+		};
+		this.mintFee = {
+			value: undefined,
+			scalar: undefined,
+		};
+		this.cancelGasInterval();
 	});
 
 	cancelGasInterval = () => {

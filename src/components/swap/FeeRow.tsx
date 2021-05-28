@@ -104,7 +104,7 @@ export const FeeRow = observer((props: FeeRowProps) => {
 										</Typography>
 								  ))
 								: null}
-						</Grid>{' '}
+						</Grid>
 					</>
 				)}
 			</Grid>
