@@ -65,7 +65,6 @@ export const Swap = observer(() => {
 	const store = useContext(StoreContext);
 	const {
 		wallet: { zero },
-		fees: { gasFee },
 		currency: { tokenMap },
 	} = store;
 
@@ -141,7 +140,7 @@ export const Swap = observer(() => {
 						<SwapFrom amount={fromAmount} handleFromAmount={handleFromAmount} />
 						<SwapTo onTokenChange={handleSelectedCoin} amount={toAmount} handleToAmount={handleToAmount} />
 						<PaymentButton />
-						<FeeDisplay selectedCoin={selectedCoin} gasFee={gasFee} />
+						<FeeDisplay selectedCoin={selectedCoin} amount={fromAmount} />
 					</Paper>
 				</Grid>
 			</Grid>

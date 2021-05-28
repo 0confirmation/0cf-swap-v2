@@ -33,6 +33,10 @@ const useStyles = makeStyles((theme: Theme) => ({
 			marginTop: 'auto',
 		},
 	},
+	inputDisplayContainer: {
+		height: '100%',
+		alignItems: 'flex-end',
+	},
 	inputHeaderText: {
 		color: theme.palette.text.primary,
 		fontWeight: 'bolder',
@@ -46,6 +50,7 @@ const useStyles = makeStyles((theme: Theme) => ({
 		paddingRight: theme.spacing(1),
 		color: theme.palette.text.primary,
 		fontSize: '32px',
+		marginBottom: '4px',
 		[theme.breakpoints.down('xs')]: {
 			fontSize: '28px',
 			marginTop: 'auto',
@@ -68,7 +73,7 @@ const SwapTo = (props: SwapToProps) => {
 			</Typography>
 			<Grid container direction="row" justify="space-between">
 				<Grid item xs={5}>
-					<Grid container direction="row">
+					<Grid container direction="row" className={classes.inputDisplayContainer}>
 						<Icon icon={btcIcon} className={classes.inputIcon} />
 						<Typography className={classes.inputHeaderText}>BTC</Typography>
 					</Grid>

@@ -52,7 +52,7 @@ const SwapTo = (props: SwapToProps) => {
 					TO
 				</Typography>
 			</Grid>
-			<Grid container direction="row" justify="space-between">
+			<Grid container direction="row" justify="space-between" alignItems="flex-end">
 				<Grid item xs={5}>
 					<SwapToSelection onTokenChange={onTokenChange} />
 				</Grid>

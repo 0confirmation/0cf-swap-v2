@@ -19,3 +19,7 @@ export type FeeDescription = {
 	value: BigNumber | undefined;
 	scalar: BigNumber | undefined;
 };
+export type RenFees = {
+	mintFee: BigNumber;
+	networkFee: BigNumber;
+};
