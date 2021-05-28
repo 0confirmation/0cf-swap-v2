@@ -12,10 +12,14 @@ const fontFamily = [
 export const sushiTheme = createMuiTheme({
 	typography: {
 		fontFamily: fontFamily,
+		button: {
+			textTransform: 'none',
+		},
 	},
 	shape: {
 		borderRadius: 15,
 	},
+
 	palette: {
 		type: 'dark',
 		primary: {

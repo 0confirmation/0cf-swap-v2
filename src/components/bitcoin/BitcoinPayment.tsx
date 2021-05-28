@@ -8,11 +8,15 @@ import PaymentModal from './PaymentModal';
 
 const useStyles = makeStyles((theme: Theme) => ({
 	submitButton: {
-		background: `linear-gradient(${theme.palette.primary.main} 0%, ${theme.palette.secondary.main} 100%) left bottom no-repeat`,
+		background: `linear-gradient(to right, ${theme.palette.primary.main}, ${theme.palette.secondary.main}) repeat scroll 0% 0% border-box`,
 		color: theme.palette.text.primary,
-		fontWeight: 'bold',
 		marginTop: theme.spacing(1),
 		marginBottom: theme.spacing(1),
+		width: '85%',
+		borderRadius: '8px',
+		paddingTop: theme.spacing(1.5),
+		paddingBottom: theme.spacing(1.5),
+		fontSize: '1.2rem',
 	},
 }));
 
@@ -45,7 +49,7 @@ export const BitcoinPayment = observer((): JSX.Element => {
 				onClick={!isActive() ? handleConnect : handleOpen}
 				variant="contained"
 			>
-				{!isActive() ? 'CONNECT WALLET' : 'REVIEW ORDER'}
+				{!isActive() ? 'Connect Wallet' : 'Review Order'}
 			</Button>
 			<PaymentModal open={open} handleClose={handleClose} />
 		</>

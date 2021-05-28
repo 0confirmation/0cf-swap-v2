@@ -52,7 +52,7 @@ const secondarySidebarLinks = [
 	{
 		title: 'Sushiswap',
 		view: undefined,
-		url: 'https://sushiswap.com/',
+		url: 'https://sushi.com/',
 		disabled: false,
 	},
 	{
