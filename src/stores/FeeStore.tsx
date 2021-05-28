@@ -28,11 +28,18 @@ export default class FeeStore {
 
 	/* ETH gas prices based on https://gasnow.org/
 	 */
-	private async _gasnowPrices(): Promise<BigNumber> {
+	private async _gasnowPrices(): Promise<FeeDescription> {
 		const prices = await fetch('https://www.gasnow.org/api/v3/gas/price?utm_source=badgerv2');
+		const gasEstimate = new BigNumber(1.46e6);
 		const result = await prices.json();
+		const rapid = new BigNumber(result.data['rapid']);
+		const ethGasFee = new BigNumber(gasEstimate).multipliedBy(1e8).multipliedBy(rapid).dividedBy(1e18);
+		const btcGasFee = this.store.currency.toToken(ethGasFee.dividedBy(1e7), 'bitcoin', 'ethereum', undefined, true);
 		// keepers use 'Rapid' gas prices to handle transactions, so we only are interested in this.
-		return new BigNumber(result.data['rapid']).multipliedBy(1e9);
+		return {
+			scalar: rapid.multipliedBy(1e9),
+			value: new BigNumber(btcGasFee),
+		};
 	}
 
 	/* Pull mint fee from renJS
@@ -40,7 +47,6 @@ export default class FeeStore {
 	private async _getRenMintFee(): Promise<RenFees> {
 		const renJS = this.store.wallet.network.renJS;
 		const fees = await renJS.getFees();
-		console.log('fees:', new BigNumber(fees.btc.lock).dividedBy(1e8).toString());
 		return {
 			mintFee: new BigNumber(fees.btc.ethereum.mint).dividedBy(1e2),
 			networkFee: new BigNumber(fees.btc.lock).dividedBy(1e8),
@@ -54,16 +60,16 @@ export default class FeeStore {
 	setFees = action(() => {
 		switch (this.store.wallet.network.name) {
 			case NETWORK_LIST.ETH:
-				this._gasnowPrices().then((value: BigNumber) => {
-					this.gasFee.value = value;
+				this._gasnowPrices().then((value: FeeDescription) => {
+					this.gasFee = value;
 				});
 				this._getRenMintFee().then((value: RenFees) => {
 					this.mintFee.scalar = value.mintFee;
 					this.btcFee.value = value.networkFee;
 				});
 				this.gasInterval = setInterval(() => {
-					this._gasnowPrices().then((value: BigNumber) => {
-						this.gasFee.scalar = value;
+					this._gasnowPrices().then((value: FeeDescription) => {
+						this.gasFee = value;
 					});
 				}, 1000 * 8);
 		}

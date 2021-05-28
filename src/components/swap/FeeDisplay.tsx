@@ -6,7 +6,6 @@ import BigNumber from 'bignumber.js';
 import { StoreContext } from '../../stores/ZeroStore';
 import { SUPPORTED_TOKEN_NAMES } from '../../config/constants/tokens';
 import FeeRow, { FeeRowProps } from './FeeRow';
-import { FeeDescription } from '../../config/models/currency';
 
 export interface SwapToProps {
 	selectedCoin: SUPPORTED_TOKEN_NAMES;
@@ -46,14 +45,17 @@ export const FeeDisplay = observer((props: SwapToProps): JSX.Element | null => {
 
 	const bnAmount = new BigNumber(amount);
 
+	const _calcProtocolFees = (): string => {
+		if (!mintFee.scalar || !gasFee.value || !zeroFee.scalar || !btcFee.value) return '0';
+
+		return bnAmount
+			.multipliedBy(mintFee.scalar.dividedBy(1e2))
+			.plus(bnAmount.multipliedBy(zeroFee.scalar.dividedBy(1e2)))
+			.plus(btcFee.value)
+			.toString();
+	};
+
 	const _calcTotalFee = (): string => {
-		console.log(
-			'check:',
-			bnAmount.toString(),
-			mintFee.scalar?.toString(),
-			gasFee.value?.toString(),
-			btcFee.value?.toString(),
-		);
 		if (!mintFee.scalar || !gasFee.value || !zeroFee.scalar || !btcFee.value) return '0';
 
 		// TODO: include gas estimate in here
@@ -61,6 +63,7 @@ export const FeeDisplay = observer((props: SwapToProps): JSX.Element | null => {
 			.multipliedBy(mintFee.scalar.dividedBy(1e2))
 			.plus(bnAmount.multipliedBy(zeroFee.scalar.dividedBy(1e2)))
 			.plus(btcFee.value)
+			.plus(gasFee.value)
 			.toString();
 	};
 
@@ -81,7 +84,7 @@ export const FeeDisplay = observer((props: SwapToProps): JSX.Element | null => {
 			],
 			description: `${_calcTotalFee()} BTC`,
 			secondaryDescription: `(${toToken(
-				new BigNumber(_calcTotalFee()),
+				new BigNumber(_calcProtocolFees()),
 				selectedCoin.toLowerCase(),
 				'bitcoin',
 				2,
@@ -95,9 +98,11 @@ export const FeeDisplay = observer((props: SwapToProps): JSX.Element | null => {
 		},
 		{
 			title: 'Estimated Gas Cost',
-			secondaryTitle: [`@${gasFee.value ? gasFee.value.dividedBy(1e18).toFixed(2) : '-'} gwei`],
-			description: '0.00001 BTC',
-			secondaryDescription: '($5.40)',
+			secondaryTitle: [`@${gasFee.scalar ? gasFee.scalar.dividedBy(1e18).toFixed(2) : '-'} gwei`],
+			description: `${gasFee.value ? gasFee.value : '-'} BTC`,
+			secondaryDescription: `(${
+				gasFee.value ? toToken(gasFee.value, selectedCoin.toLowerCase(), 'bitcoin', 2) : '-'
+			} ${store.currency.tokenMap![selectedCoin.toLowerCase()].symbol})`,
 			collapsable: false,
 		},
 	];

@@ -107,20 +107,15 @@ export const toCurrency = (
  * @param oldValue = Previous value to revert to if an invalid input
  */
 export const coerceInputToNumber = (newValue: string, oldValue: string) => {
-	console.log('check', newValue, oldValue);
 	// Format to add a leading zero in front of decimals
 	if (newValue === '.') newValue = '0.';
-	console.log('check2', newValue, oldValue);
 
 	// Format to remove leading zeros
 	if (newValue.length >= 2 && newValue[0] === '0' && newValue[1] !== '.') newValue = newValue.substring(1);
-	console.log('check3', newValue, oldValue);
 
 	if (newValue === '') {
-		console.log('new value missing: ', newValue);
 		return '0';
 	}
-	console.log('check4', isNaN(newValue as unknown as number));
 	if (isNaN(newValue as unknown as number)) {
 		return oldValue;
 	} else {

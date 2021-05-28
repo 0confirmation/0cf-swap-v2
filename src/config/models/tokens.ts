@@ -1,6 +1,7 @@
 import BigNumber from 'bignumber.js';
 import { action, extendObservable } from 'mobx';
 import type { ZeroStore } from '../../stores/ZeroStore';
+import { numberWithCommas } from '../../utils/helpers';
 
 export interface TokenMap {
 	[name: string]: Token;
@@ -36,15 +37,23 @@ export class Token {
 	 * @param gasCost = Estimation of gas cost for the transaction in wei
 	 * @param fees = fees in sats
 	 */
-	valueOut(amount: BigNumber, gasCost?: BigNumber, fees?: BigNumber): string | null {
-		if (!this.store.currency.prices || this.price.eq(0)) return null;
-		const feeAmount = fees ? fees.dividedBy(1e8) : new BigNumber(0);
-		const gasAmount = gasCost ? gasCost.dividedBy(1e18) : new BigNumber(0);
+	valueOut(amount: BigNumber, gasCost?: BigNumber, fees?: BigNumber, decimals = 8, noCommas = false): string | null {
+		if (this.price.eq(0)) return null;
+		const btcFee = this.store.fees.btcFee.value ?? new BigNumber(0);
+		const zeroFee = this.store.fees.zeroFee.scalar
+			? new BigNumber(amount.multipliedBy(this.store.fees.zeroFee.scalar))
+			: new BigNumber(0);
+		const gasFee = this.store.fees.gasFee.value ?? new BigNumber(0);
+		const mintFee = this.store.fees.mintFee.scalar
+			? new BigNumber(amount.multipliedBy(this.store.fees.mintFee.scalar))
+			: new BigNumber(0);
+		const totalFees = btcFee.plus(zeroFee).plus(gasFee).plus(mintFee);
 
-		const ethPrice: BigNumber = this.store.currency.prices['ethereum']['btc'];
-		const gasInSats: BigNumber = gasAmount.multipliedBy(ethPrice);
+		const finalAmount = amount.minus(totalFees).dividedBy(this.price);
 
-		return amount.minus(feeAmount).minus(gasInSats).dividedBy(this.price).toString();
+		return noCommas
+			? finalAmount.toFixed(decimals, BigNumber.ROUND_HALF_FLOOR).toString()
+			: numberWithCommas(finalAmount.toFixed(decimals, BigNumber.ROUND_HALF_FLOOR)).toString();
 	}
 
 	/* Returns the amount of Bitcoin needed to receive the amount of wanted tokens
@@ -53,14 +62,22 @@ export class Token {
 	 * @param gasCost = Estimation of gas cost for the transaction in wei
 	 * @param fees = fees in sats
 	 */
-	valueIn(amount: BigNumber, gasCost?: BigNumber, fees?: BigNumber): string | null {
-		if (!this.store.currency.prices || this.price.eq(0)) return null;
-		const feeAmount = fees ? fees.dividedBy(1e8) : new BigNumber(0);
-		const gasAmount = gasCost ? gasCost.dividedBy(1e18) : new BigNumber(0);
+	valueIn(amount: BigNumber, gasCost?: BigNumber, fees?: BigNumber, decimals = 8, noCommas = false): string | null {
+		if (this.price.eq(0)) return null;
+		const btcFee = this.store.fees.btcFee.value ?? new BigNumber(0);
+		const zeroFee = this.store.fees.zeroFee.scalar
+			? new BigNumber(amount.multipliedBy(this.store.fees.zeroFee.scalar))
+			: new BigNumber(0);
+		const gasFee = this.store.fees.gasFee.value ?? new BigNumber(0);
+		const mintFee = this.store.fees.mintFee.scalar
+			? new BigNumber(amount.multipliedBy(this.store.fees.mintFee.scalar))
+			: new BigNumber(0);
+		const totalFees = btcFee.plus(zeroFee).plus(gasFee).plus(mintFee);
 
-		const ethPrice: BigNumber = this.store.currency.prices['ethereum']['btc'];
-		const gasInSats: BigNumber = gasAmount.multipliedBy(ethPrice);
+		const finalAmount = amount.multipliedBy(this.price).minus(totalFees);
 
-		return amount.multipliedBy(this.price).minus(feeAmount).minus(gasInSats).toString();
+		return noCommas
+			? finalAmount.toFixed(decimals, BigNumber.ROUND_HALF_FLOOR).toString()
+			: numberWithCommas(finalAmount.toFixed(decimals, BigNumber.ROUND_HALF_FLOOR)).toString();
 	}
 }

@@ -64,8 +64,9 @@ export const Swap = observer(() => {
 	const classes = useStyles();
 	const store = useContext(StoreContext);
 	const {
-		wallet: { zero },
+		wallet: { zero, connectedAddress },
 		currency: { tokenMap },
+		fees: { gasFee },
 	} = store;
 
 	const btc = getSushiToken(SUPPORTED_TOKEN_NAMES.RENBTC, store);
@@ -76,6 +77,11 @@ export const Swap = observer(() => {
 	const [fromAmount, setFromAmount] = useState('0');
 	const [route, setRoute] = useState<SushiRoute | undefined>(undefined);
 	console.log('route', route);
+
+	// Update our outputed from amount with new fees when gas fee changes
+	useEffect(() => {
+		handleFromAmount(fromAmount);
+	}, [gasFee, selectedCoin]);
 
 	/* On change of the zero class, check if the user is connected
 	 * if so, set an interval to regularly update the liquidity
@@ -117,8 +123,8 @@ export const Swap = observer(() => {
 		// TODO: Subtract fees from toAmount, convert to BTC and populate fromAmount
 		const token = tokenMap ? tokenMap[selectedCoin.toLowerCase()] : null;
 		if (token) {
-			const value = token.valueIn(new BigNumber(amount));
-			if (value) setFromAmount(value);
+			const value = token.valueIn(new BigNumber(amount), undefined, undefined, 8);
+			value && parseFloat(value) > 0 ? setFromAmount(value) : setFromAmount('0');
 		}
 	};
 
@@ -127,8 +133,8 @@ export const Swap = observer(() => {
 		const token = tokenMap ? tokenMap[selectedCoin.toLowerCase()] : null;
 		if (token) {
 			// TODO: add in fees here - investigate using sushiswap SDK to get correct estimated amount
-			const value = token.valueOut(new BigNumber(amount));
-			if (value) setToAmount(value);
+			const value = token.valueOut(new BigNumber(amount), undefined, undefined, 4);
+			value && parseFloat(value) > 0 ? setToAmount(value) : setToAmount('0');
 		}
 	};
 
