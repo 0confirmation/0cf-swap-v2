@@ -1,15 +1,14 @@
 import { action, extendObservable } from 'mobx';
 import type { ZeroStore } from './ZeroStore';
-import { fetchPrices, fetchBtcExchangeRates, numberWithCommas } from '../utils/helpers';
-import type { PriceSummary, ExchangeRates } from '../config/models/currency';
+import { fetchPrices, numberWithCommas } from '../utils/helpers';
+import type { PriceSummary } from '../config/models/currency';
 import type { TokenMap } from '../config/models/tokens';
-import type { TokenDefinition } from '../config/constants/tokens';
+import { SUPPORTED_TOKEN_NAMES, TokenDefinition } from '../config/constants/tokens';
 import { Token } from '../config/models/tokens';
 import BigNumber from 'bignumber.js';
 
 export default class CurrencyStore {
 	private readonly store!: ZeroStore;
-	public btcExchangeRates: ExchangeRates | null | undefined;
 	public prices: PriceSummary | null | undefined;
 	public tokens: Token[];
 	public tokenMapCache: TokenMap;
@@ -17,32 +16,23 @@ export default class CurrencyStore {
 	constructor(store: ZeroStore) {
 		this.store = store;
 		this.prices = undefined;
-		this.btcExchangeRates = undefined;
 		this.tokenMapCache = {};
 
 		extendObservable(this, {
 			prices: undefined,
-			btcExchangeRates: undefined,
 			tokenMapCache: undefined,
 		});
 
 		this.tokens = this.store.wallet.network.tokens.map((token: TokenDefinition) => {
 			return new Token(this.store, token.address, token.name, token.symbol, token.decimals);
 		});
-		this.tokenMapCache = Object.assign({}, ...this.tokens.map((token) => ({ [token.name.toLowerCase()]: token })));
-		// Hardcode bitcoin into the token map as it doesn't exist on any host chains
-		this.tokenMapCache['bitcoin'] = new Token(this.store, '', 'Bitcoin', 'btc', 8, new BigNumber(1));
+		this.tokenMapCache = Object.assign({}, ...this.tokens.map((token) => ({ [token.name]: token })));
 
 		this.init();
 	}
 
 	init = action(async (): Promise<void> => {
 		await this.loadPrices();
-
-		// Refresh prices every minute
-		setInterval(() => {
-			this.loadPrices();
-		}, 1000 * 6);
 	});
 
 	get tokenMap(): TokenMap | null | undefined {
@@ -53,10 +43,17 @@ export default class CurrencyStore {
 		this.tokenMapCache = tokenMap;
 	});
 
+	setPrices = action((prices: PriceSummary | null): void => {
+		if (prices) this.prices = prices;
+	});
+
+	setTokenPrice = action((token: Token, price: BigNumber): void => {
+		token.setPrice(price);
+	});
+
 	loadPrices = action(async (): Promise<void> => {
-		this.prices = await fetchPrices(this.store);
-		this.btcExchangeRates = await fetchBtcExchangeRates();
-		if (!this.prices || !this.btcExchangeRates) return;
+		this.setPrices(await fetchPrices(this.store));
+		if (!this.prices) return;
 
 		const newTokenMap = this.tokenMapCache;
 
@@ -64,15 +61,11 @@ export default class CurrencyStore {
 		// the prices to the defined tokens.
 		Object.keys(this.prices).forEach((key) => {
 			if (this.prices && newTokenMap[key] && !!this.prices[key]) {
-				newTokenMap[key].setPrice(this.prices[key]);
+				this.setTokenPrice(newTokenMap[key], this.prices[key]);
 			}
 		});
 
 		this.setTokenMap(newTokenMap);
-
-		// After the iteration, we set bitcoin price from exchange
-		// rates as there is no token.
-		this.prices['bitcoin'] = new BigNumber(1);
 	});
 
 	/* toToken accepts a value, input token and output token name and formatting options
@@ -93,18 +86,18 @@ export default class CurrencyStore {
 		if (!value || value.isNaN()) value = new BigNumber(0);
 
 		// TODO: handle loading more elegantly
-		if (!this.tokenMap) return '0.00';
+		if (!this.prices || !this.tokenMap) return '0.00';
 
-		const toToken = this.tokenMap[tokenName.toLowerCase()];
-		const fromToken = this.tokenMap[fromName.toLowerCase()];
+		const toPrice = this.prices[tokenName];
+		const fromPrice = this.prices[fromName];
 
-		if (!toToken || toToken.price.eq(0)) return '-';
+		if (!toPrice || !fromPrice) return '-';
 
 		const normal =
-			fromName !== 'bitcoin'
-				? value.multipliedBy(toToken.price.dividedBy(fromToken.price))
-				: value.multipliedBy(toToken.price);
-		const decimals = preferredDecimals ?? toToken.decimals;
+			fromName !== SUPPORTED_TOKEN_NAMES.WBTC
+				? value.multipliedBy(toPrice.dividedBy(fromPrice))
+				: value.multipliedBy(toPrice);
+		const decimals = preferredDecimals ?? this.tokenMap[tokenName].decimals;
 
 		const fixedNormal = noCommas
 			? normal.toFixed(decimals, BigNumber.ROUND_HALF_FLOOR)

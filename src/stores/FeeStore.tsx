@@ -3,6 +3,8 @@ import BigNumber from 'bignumber.js';
 import { NETWORK_LIST } from '../config/constants/network';
 import { action, extendObservable } from 'mobx';
 import { FeeDescription, RenFees } from '../config/models/currency';
+import { SUPPORTED_TOKEN_NAMES } from '../config/constants/tokens';
+import { Token, TokenMap } from '../config/models/tokens';
 
 export default class FeeStore {
 	private readonly store!: ZeroStore;
@@ -34,7 +36,13 @@ export default class FeeStore {
 		const result = await prices.json();
 		const rapid = new BigNumber(result.data['rapid']);
 		const ethGasFee = new BigNumber(gasEstimate).multipliedBy(rapid).dividedBy(1e18);
-		const btcGasFee = this.store.currency.toToken(ethGasFee, 'bitcoin', 'ethereum', undefined, true);
+		const btcGasFee = this.store.currency.toToken(
+			ethGasFee,
+			SUPPORTED_TOKEN_NAMES.WBTC,
+			SUPPORTED_TOKEN_NAMES.ETH,
+			undefined,
+			true,
+		);
 		// keepers use 'Rapid' gas prices to handle transactions, so we only are interested in this.
 		return {
 			scalar: rapid.multipliedBy(1e9),
@@ -53,6 +61,15 @@ export default class FeeStore {
 		};
 	}
 
+	setGasFee = action((value: FeeDescription) => {
+		this.gasFee = value;
+	});
+
+	setRenFee = action((mintFee: BigNumber, networkFee: BigNumber): void => {
+		this.mintFee.scalar = mintFee;
+		this.btcFee.value = networkFee;
+	});
+
 	/* Pulls data for the current network and sets the gas fee to
 	 * the appropriate amount, stored in wei.  We poll this every 8
 	 * seconds per gasNow's standard updates.
@@ -61,19 +78,33 @@ export default class FeeStore {
 		switch (this.store.wallet.network.name) {
 			case NETWORK_LIST.ETH:
 				this._gasnowPrices().then((value: FeeDescription) => {
-					this.gasFee = value;
+					this.setGasFee(value);
 				});
 				this._getRenMintFee().then((value: RenFees) => {
-					this.mintFee.scalar = value.mintFee;
-					this.btcFee.value = value.networkFee;
+					this.setRenFee(value.mintFee, value.networkFee);
 				});
 				this.gasInterval = setInterval(() => {
 					this._gasnowPrices().then((value: FeeDescription) => {
-						this.gasFee = value;
+						this.setGasFee(value);
 					});
 				}, 1000 * 8);
 		}
 	});
+
+	getAllFees = (store: ZeroStore, amount: BigNumber, currency: SUPPORTED_TOKEN_NAMES): BigNumber | undefined => {
+		const currencyPrice = store.currency.prices ? store.currency.prices[currency] : null;
+		if (!currencyPrice) return undefined;
+
+		const calcBtcFee = this.btcFee.value ? this.btcFee.value.multipliedBy(currencyPrice) : new BigNumber(0);
+		const zeroFee = this.zeroFee.scalar
+			? new BigNumber(amount.multipliedBy(this.zeroFee.scalar))
+			: new BigNumber(0);
+		const gasFee = this.gasFee.value?.multipliedBy(currencyPrice) ?? new BigNumber(0);
+		const mintFee = this.mintFee.scalar
+			? new BigNumber(amount.multipliedBy(this.mintFee.scalar))
+			: new BigNumber(0);
+		return calcBtcFee.plus(zeroFee).plus(gasFee).plus(mintFee);
+	};
 
 	/* Clear all fees and intervals.
 	 */

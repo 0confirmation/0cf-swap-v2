@@ -38,6 +38,7 @@ export const sushiTheme = createMuiTheme({
 		//@ts-ignore
 		custom: {
 			raisedPaper: 'rgba(32, 34, 49, 1) !important',
+			backgroundCircle: '#121A31',
 		},
 	},
 });

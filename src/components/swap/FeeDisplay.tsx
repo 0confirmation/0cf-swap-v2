@@ -10,6 +10,7 @@ import FeeRow, { FeeRowProps } from './FeeRow';
 export interface SwapToProps {
 	selectedCoin: SUPPORTED_TOKEN_NAMES;
 	amount: string;
+	priceImpact: string;
 }
 
 const useStyles = makeStyles((theme: Theme) => ({
@@ -41,7 +42,7 @@ export const FeeDisplay = observer((props: SwapToProps): JSX.Element | null => {
 		currency: { toToken },
 		fees: { gasFee, mintFee, btcFee, zeroFee },
 	} = store;
-	const { selectedCoin, amount } = props;
+	const { selectedCoin, amount, priceImpact } = props;
 
 	const bnAmount = new BigNumber(amount);
 
@@ -69,8 +70,8 @@ export const FeeDisplay = observer((props: SwapToProps): JSX.Element | null => {
 	const feeInfo: FeeRowProps[] = [
 		{
 			title: 'Rate',
-			description: `1 BTC = ${toToken(new BigNumber(1), selectedCoin.toLowerCase(), 'bitcoin', 2)}${' '} ${
-				store.currency.tokenMap![selectedCoin.toLowerCase()].symbol
+			description: `1 BTC = ${toToken(new BigNumber(1), selectedCoin, SUPPORTED_TOKEN_NAMES.WBTC, 2)}${' '} ${
+				store.currency.tokenMap![selectedCoin].symbol
 			}`,
 			collapsable: false,
 		},
@@ -84,15 +85,15 @@ export const FeeDisplay = observer((props: SwapToProps): JSX.Element | null => {
 			description: `${_calcProtocolFees()} BTC`,
 			secondaryDescription: `(${toToken(
 				new BigNumber(_calcProtocolFees()),
-				selectedCoin.toLowerCase(),
-				'bitcoin',
+				selectedCoin,
+				SUPPORTED_TOKEN_NAMES.WBTC,
 				2,
-			)} ${' '} ${store.currency.tokenMap![selectedCoin.toLowerCase()].symbol})`,
+			)} ${' '} ${store.currency.tokenMap![selectedCoin].symbol})`,
 			collapsable: true,
 		},
 		{
 			title: 'Approx. Slippage',
-			description: '0.01%',
+			description: `${priceImpact}%`,
 			collapsable: false,
 		},
 		{
@@ -100,8 +101,8 @@ export const FeeDisplay = observer((props: SwapToProps): JSX.Element | null => {
 			secondaryTitle: [`@${gasFee.scalar ? gasFee.scalar.dividedBy(1e18).toFixed(2) : '-'} gwei`],
 			description: `${gasFee.value ? gasFee.value : '-'} BTC`,
 			secondaryDescription: `(${
-				gasFee.value ? toToken(gasFee.value, selectedCoin.toLowerCase(), 'bitcoin', 2) : '-'
-			} ${store.currency.tokenMap![selectedCoin.toLowerCase()].symbol})`,
+				gasFee.value ? toToken(gasFee.value, selectedCoin, SUPPORTED_TOKEN_NAMES.WBTC, 2) : '-'
+			} ${store.currency.tokenMap![selectedCoin].symbol})`,
 			collapsable: false,
 		},
 		{
@@ -109,10 +110,10 @@ export const FeeDisplay = observer((props: SwapToProps): JSX.Element | null => {
 			description: `${_calcTotalFee()} BTC`,
 			secondaryDescription: `(${toToken(
 				new BigNumber(_calcTotalFee()),
-				selectedCoin.toLowerCase(),
-				'bitcoin',
+				selectedCoin,
+				SUPPORTED_TOKEN_NAMES.WBTC,
 				2,
-			)}${' '} ${store.currency.tokenMap![selectedCoin.toLowerCase()].symbol})`,
+			)}${' '} ${store.currency.tokenMap![selectedCoin].symbol})`,
 			collapsable: false,
 		},
 	];

@@ -12,18 +12,23 @@ import PaymentButton from './PaymentButton';
 import FeeDisplay from './FeeDisplay';
 import StatsDisplay from './StatsDisplay';
 import { BigNumber } from 'bignumber.js';
+import { fetchRoute, fetchTrade, numberWithCommas, valueAfterFees } from '../../utils/helpers';
+import { TradeType } from '@sushiswap/sdk';
 
 const useStyles = makeStyles((theme: Theme) => ({
 	mainContainer: {
-		background: 'radial-gradient(circle at 50%, #121A31, #0d0415 50%)',
+		// Reason: typescript doesn't allow for custom classes on material-ui
+		// @ts-ignore
+		background: `radial-gradient(circle at 50%, ${theme.palette.custom.backgroundCircle}, ${theme.palette.background.default} 50%)`,
 		[theme.breakpoints.up('md')]: {
 			paddingLeft: DRAWER_WIDTH + 48,
-			background: 'radial-gradient(circle at 60%, #121A31, #0d0415 50%)',
+			// @ts-ignore
+			background: `radial-gradient(circle at 60%, ${theme.palette.custom.backgroundCircle}, ${theme.palette.background.default} 50%)`,
 		},
 		paddingTop: `${navHeight + 1.5}rem`,
 		[theme.breakpoints.down('sm')]: {
-			marginLeft: '8px',
-			marginRight: '8px',
+			marginLeft: theme.spacing(1),
+			marginRight: theme.spacing(1),
 			paddingLeft: 0,
 			paddingRight: 0,
 		},
@@ -63,17 +68,31 @@ export const Swap = observer(() => {
 	const store = useContext(StoreContext);
 	const {
 		wallet: { zero },
-		currency: { tokenMap },
-		fees: { gasFee },
+		currency: { loadPrices },
+		fees: { gasFee, getAllFees },
 	} = store;
 
 	const [selectedCoin, setSelectedCoin] = useState(SUPPORTED_TOKEN_NAMES.USDC);
 	const [toAmount, setToAmount] = useState('0');
 	const [fromAmount, setFromAmount] = useState('0');
+	const [priceImpact, setPriceImpact] = useState('0');
+	const [updateSide, setUpdateSide] = useState('from');
+
+	// If fees or price changes, we update the amounts displayed based
+	// on what the user had updated last
+	const noChangeAmountUpdate = (): void => {
+		switch (updateSide) {
+			case 'to':
+				handleToAmount(toAmount);
+				break;
+			default:
+				handleFromAmount(fromAmount);
+		}
+	};
 
 	// Update our outputed from amount with new fees when gas fee changes
 	useEffect(() => {
-		handleFromAmount(fromAmount);
+		noChangeAmountUpdate();
 		/* eslint-disable */
 	}, [gasFee, selectedCoin]);
 
@@ -81,16 +100,16 @@ export const Swap = observer(() => {
 	 * if so, set an interval to regularly update the liquidity
 	 * pool holdings.
 	 */
-	useEffect(() => {
-		const liquidityInterval = setInterval(() => {
-			Promise.all([getLiquidity(zero)]);
-		}, 1000 * 360);
-		if (zero) {
-			Promise.all([getLiquidity(zero)]);
-		} else {
-			clearInterval(liquidityInterval);
-		}
-	}, [zero]);
+	// useEffect(() => {
+	// 	const liquidityInterval = setInterval(() => {
+	// 		Promise.all([getLiquidity(zero)]);
+	// 	}, 1000 * 360);
+	// 	if (zero) {
+	// 		Promise.all([getLiquidity(zero)]);
+	// 	} else {
+	// 		clearInterval(liquidityInterval);
+	// 	}
+	// }, [zero]);
 
 	const handleSelectedCoin = async (name: SUPPORTED_TOKEN_NAMES) => {
 		setSelectedCoin(name);
@@ -98,22 +117,45 @@ export const Swap = observer(() => {
 	};
 
 	const handleToAmount = async (amount: string) => {
+		setUpdateSide('to');
 		setToAmount(amount);
-		// TODO: Subtract fees from toAmount, convert to BTC and populate fromAmount
-		const token = tokenMap ? tokenMap[selectedCoin.toLowerCase()] : null;
-		if (token) {
-			const value = token.valueIn(new BigNumber(amount), undefined, undefined, 8);
-			value && parseFloat(value) > 0 ? setFromAmount(value) : setFromAmount('0');
+		await loadPrices();
+		const bnAmount = new BigNumber(amount);
+		const fees = new BigNumber(getAllFees(store, bnAmount, selectedCoin) ?? 0);
+		const tradeAmount = bnAmount.plus(fees);
+		const trade = await fetchTrade(
+			store,
+			SUPPORTED_TOKEN_NAMES.WBTC,
+			selectedCoin,
+			tradeAmount,
+			TradeType.EXACT_OUTPUT,
+		);
+		if (trade) {
+			const value = bnAmount.dividedBy(new BigNumber(trade.executionPrice.toFixed(6)));
+			value && value.gt(0)
+				? setFromAmount(numberWithCommas(value.toFixed(4, BigNumber.ROUND_HALF_FLOOR)))
+				: setFromAmount('0');
 		}
 	};
 
 	const handleFromAmount = async (amount: string) => {
+		setUpdateSide('from');
 		setFromAmount(amount);
-		const token = tokenMap ? tokenMap[selectedCoin.toLowerCase()] : null;
-		if (token) {
-			// TODO: add in fees here - investigate using sushiswap SDK to get correct estimated amount
-			const value = token.valueOut(new BigNumber(amount), undefined, undefined, 4);
+		await loadPrices();
+		const bnAmount = new BigNumber(amount);
+		const trade = bnAmount.gt(0)
+			? await fetchTrade(store, SUPPORTED_TOKEN_NAMES.WBTC, selectedCoin, bnAmount, TradeType.EXACT_INPUT)
+			: undefined;
+		if (trade) {
+			const executionAmount = bnAmount.multipliedBy(new BigNumber(trade.executionPrice.toFixed(2)));
+			const value = valueAfterFees(store, executionAmount, selectedCoin);
+			setPriceImpact(trade.priceImpact.toSignificant(2));
 			value && parseFloat(value) > 0 ? setToAmount(value) : setToAmount('0');
+		} else if (updateSide === 'to') {
+			setPriceImpact('0');
+		} else {
+			setToAmount('0');
+			setPriceImpact('0');
 		}
 	};
 
@@ -125,7 +167,7 @@ export const Swap = observer(() => {
 						<SwapFrom amount={fromAmount} handleFromAmount={handleFromAmount} />
 						<SwapTo onTokenChange={handleSelectedCoin} amount={toAmount} handleToAmount={handleToAmount} />
 						<PaymentButton />
-						<FeeDisplay selectedCoin={selectedCoin} amount={fromAmount} />
+						<FeeDisplay selectedCoin={selectedCoin} amount={fromAmount} priceImpact={priceImpact} />
 					</Paper>
 				</Grid>
 			</Grid>

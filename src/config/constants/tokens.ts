@@ -70,8 +70,7 @@ export const getTokens = (network?: NETWORK_LIST): TokenDefinition[] => {
 export const getSushiToken = (tokenName: string, store: ZeroStore): SushiToken | undefined => {
 	if (!store.currency) return undefined;
 	const { tokenMap } = store.currency;
-	const token = tokenMap ? tokenMap[tokenName.toLowerCase()] : null;
-
+	const token = tokenMap ? tokenMap[tokenName] : null;
 	return token
 		? new SushiToken(store.wallet.network.networkId, token.address, token.decimals, token.symbol, token.name)
 		: undefined;

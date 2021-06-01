@@ -66,8 +66,9 @@ export default class WalletStore {
 		this.onboard = wsOnboard;
 		this.provider = new ethers.providers.Web3Provider(walletState.wallet.provider);
 		this._setZero(this.provider);
-		this.store.fees.setFees();
-		this.store.currency.loadPrices();
+		this.store.currency.loadPrices().then(() => {
+			this.store.fees.setFees();
+		});
 	});
 
 	disconnect = action(() => {
