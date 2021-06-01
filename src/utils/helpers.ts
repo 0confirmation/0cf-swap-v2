@@ -1,13 +1,9 @@
 import type { PriceSummary, ExchangeRates } from '../config/models/currency';
 import BigNumber from 'bignumber.js';
 import type { ZeroStore } from '../stores/ZeroStore';
-
-const mockPrices: { [name: string]: BigNumber } = {
-	btc: new BigNumber(0),
-	usd: new BigNumber(0),
-	eth: new BigNumber(0),
-	cad: new BigNumber(0),
-};
+import { getSushiToken, SUPPORTED_TOKEN_NAMES } from '../config/constants/tokens';
+import { Route as SushiRoute, Fetcher, WETH } from '@sushiswap/sdk';
+import { BaseProvider } from '@ethersproject/providers';
 
 export const fetchData = async <T>(request: () => Promise<Response>): Promise<T | null> => {
 	try {
@@ -22,10 +18,38 @@ export const fetchData = async <T>(request: () => Promise<Response>): Promise<T 
 	}
 };
 
-export const fetchPrices = async (): Promise<PriceSummary | null> => {
-	return fetchData(() =>
-		fetch('https://api.coingecko.com/api/v3/simple/price?ids=ethereum,dai,usd-coin&vs_currencies=btc,usd,cad,eth'),
-	);
+/* Fetches the pair data from sushiswap and calculates current pricing for all supported pairs
+ * @param store = store instance to get network specific data and sushi tokens
+ */
+export const fetchPrices = async (store: ZeroStore): Promise<PriceSummary | null> => {
+	let prices = {};
+	for (const token in SUPPORTED_TOKEN_NAMES) {
+		const tokenName = SUPPORTED_TOKEN_NAMES[token];
+		if (tokenName === SUPPORTED_TOKEN_NAMES.WBTC) break;
+		const network = store.wallet.network.networkId;
+
+		// Reason: WETH is indexed by number, TS is throwing an error here incorrectly.
+		//@ts-ignore
+		const weth = WETH[network];
+		const btc = getSushiToken(SUPPORTED_TOKEN_NAMES.WBTC, store);
+		const wantToken = getSushiToken(tokenName, store);
+
+		if (!btc || !weth || !wantToken || !store.wallet.connectedAddress) break;
+
+		const wBTCwETHPair = await Fetcher.fetchPairData(btc, weth, store.wallet.provider as BaseProvider);
+		let wantwETHPair = undefined;
+		if (tokenName !== SUPPORTED_TOKEN_NAMES.ETH) {
+			wantwETHPair = await Fetcher.fetchPairData(wantToken, weth, store.wallet.provider as BaseProvider);
+		}
+
+		const route = !!wantwETHPair
+			? new SushiRoute([wBTCwETHPair, wantwETHPair], btc)
+			: new SushiRoute([wBTCwETHPair], btc);
+
+		prices[tokenName.toLowerCase()] = new BigNumber(route.midPrice.toFixed(2));
+	}
+
+	return prices;
 };
 
 export const fetchBtcExchangeRates = async (): Promise<ExchangeRates | null> => {
@@ -38,67 +62,6 @@ export const numberWithCommas = (x: string): string => {
 	const parts = x.toString().split('.');
 	parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ',');
 	return parts.join('.');
-};
-
-// Takes a value in a provided token and outputs that amount in
-// a selected currency.
-// input: value in token
-// output: value in currency
-export const toCurrency = (
-	store: ZeroStore,
-	value: BigNumber,
-	currency: string,
-	fromName: string,
-	hide = false,
-	preferredDecimals?: number,
-	noCommas = false,
-): string => {
-	if (!value || value.isNaN())
-		return toCurrency(store, new BigNumber(0), currency, fromName, hide, preferredDecimals);
-
-	// TODO: handle loading more elegantly
-	if (!store.currency.prices || !store.currency.btcExchangeRates) return '0.00';
-
-	let normal = value;
-	let prefix = !hide ? '₿ ' : '';
-	let decimals = 5;
-
-	const prices = store.currency.prices[fromName.toLowerCase()] ?? mockPrices;
-
-	switch (currency) {
-		case 'btc':
-			normal = normal.multipliedBy(prices.btc);
-			decimals = preferredDecimals ?? decimals;
-			break;
-		case 'usd':
-			normal = normal.multipliedBy(prices.usd);
-			decimals = preferredDecimals ?? 2;
-			prefix = '$';
-			break;
-		case 'eth':
-			prefix = 'Ξ ';
-			decimals = preferredDecimals ?? decimals;
-			normal = normal.multipliedBy(prices.eth);
-			break;
-		case 'cad':
-			normal = normal.multipliedBy(prices.cad);
-			decimals = preferredDecimals ?? 2;
-			prefix = 'C$';
-			break;
-	}
-
-	let suffix = '';
-
-	if (normal.gt(0) && normal.lt(10 ** -decimals)) {
-		normal = normal.multipliedBy(10 ** decimals);
-		suffix = `e-${decimals}`;
-	}
-
-	const fixedNormal = noCommas
-		? normal.toFixed(decimals, BigNumber.ROUND_HALF_FLOOR)
-		: numberWithCommas(normal.toFixed(decimals, BigNumber.ROUND_HALF_FLOOR));
-
-	return `${prefix}${fixedNormal}${suffix}`;
 };
 
 /* Takes an input value and the old value and performs type coercion from string to

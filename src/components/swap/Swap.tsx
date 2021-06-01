@@ -6,8 +6,6 @@ import { Theme, makeStyles } from '@material-ui/core/styles';
 import { StoreContext } from '../../stores/ZeroStore';
 import { observer } from 'mobx-react-lite';
 import { SUPPORTED_TOKEN_NAMES } from '../../config/constants/tokens';
-import { Route as SushiRoute, Pair, TokenAmount, Trade, TradeType } from '@sushiswap/sdk';
-import { getSushiToken } from '../../config/constants/tokens';
 import SwapFrom from './SwapFrom';
 import SwapTo from './SwapTo';
 import PaymentButton from './PaymentButton';
@@ -64,23 +62,19 @@ export const Swap = observer(() => {
 	const classes = useStyles();
 	const store = useContext(StoreContext);
 	const {
-		wallet: { zero, connectedAddress },
+		wallet: { zero },
 		currency: { tokenMap },
 		fees: { gasFee },
 	} = store;
 
-	const btc = getSushiToken(SUPPORTED_TOKEN_NAMES.RENBTC, store);
-	const weth = getSushiToken(SUPPORTED_TOKEN_NAMES.ETH, store);
-
 	const [selectedCoin, setSelectedCoin] = useState(SUPPORTED_TOKEN_NAMES.USDC);
 	const [toAmount, setToAmount] = useState('0');
 	const [fromAmount, setFromAmount] = useState('0');
-	const [route, setRoute] = useState<SushiRoute | undefined>(undefined);
-	console.log('route', route);
 
 	// Update our outputed from amount with new fees when gas fee changes
 	useEffect(() => {
 		handleFromAmount(fromAmount);
+		/* eslint-disable */
 	}, [gasFee, selectedCoin]);
 
 	/* On change of the zero class, check if the user is connected
@@ -101,21 +95,6 @@ export const Swap = observer(() => {
 	const handleSelectedCoin = async (name: SUPPORTED_TOKEN_NAMES) => {
 		setSelectedCoin(name);
 		handleFromAmount(fromAmount);
-		/* TODO: Finish sushi SDK */
-		const want = getSushiToken(name, store);
-
-		if (!!btc && !!weth && !!want) {
-			const newRoute = new SushiRoute(
-				[
-					new Pair(new TokenAmount(btc, '100000000'), new TokenAmount(weth, '1000000000000000000')),
-					new Pair(new TokenAmount(want, '100000000'), new TokenAmount(weth, '1000000000000000000')),
-				],
-				btc,
-			);
-			setRoute(newRoute);
-			const trade = new Trade(newRoute, new TokenAmount(want, '100000000'), TradeType.EXACT_INPUT);
-			console.log('trade:', trade);
-		}
 	};
 
 	const handleToAmount = async (amount: string) => {

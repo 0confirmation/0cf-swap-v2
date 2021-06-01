@@ -25,6 +25,7 @@ const SwapToSelection = (props: SelectionProps): JSX.Element => {
 		if (onTokenChange) {
 			onTokenChange(coin);
 		}
+		/* eslint-disable */
 	}, [coin]);
 
 	const selections = getTokens(store.wallet.network.name);
@@ -35,8 +36,8 @@ const SwapToSelection = (props: SelectionProps): JSX.Element => {
 	return (
 		<Select className={classes.select} value={coin} onChange={handleChange} id="to-currency" labelId="to-currency">
 			{selections.map((currency: TokenDefinition): JSX.Element | null => {
-				// There is no benefit in swapping to renBTC so don't offer as an option.
-				if (currency.symbol === 'renBTC') return null;
+				// There is no benefit in swapping to wBTC so don't offer as an option.
+				if (currency.symbol === 'wBTC') return null;
 				return (
 					<MenuItem className={classes.select} key={currency.symbol} value={currency.name}>
 						<SwapDisplay icon={currency.icon} name={currency.symbol} />

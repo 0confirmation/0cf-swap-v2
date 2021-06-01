@@ -85,7 +85,7 @@ export const FeeRow = observer((props: FeeRowProps) => {
 							<Grid container direction="column">
 								{secondaryTitle
 									? secondaryTitle.map((fee) => (
-											<Typography key="fee" variant="caption" color="textSecondary">
+											<Typography key={fee} variant="caption" color="textSecondary">
 												{fee}
 											</Typography>
 									  ))
@@ -99,7 +99,7 @@ export const FeeRow = observer((props: FeeRowProps) => {
 						<Grid container direction="column">
 							{secondaryTitle
 								? secondaryTitle.map((fee) => (
-										<Typography key="fee" variant="caption" color="textSecondary">
+										<Typography key={fee} variant="caption" color="textSecondary">
 											{fee}
 										</Typography>
 								  ))

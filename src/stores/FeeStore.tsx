@@ -17,12 +17,12 @@ export default class FeeStore {
 		this.gasFee = { value: undefined, scalar: undefined };
 		this.mintFee = { value: undefined, scalar: undefined };
 		this.btcFee = { value: undefined, scalar: undefined };
-		this.zeroFee = { value: undefined, scalar: new BigNumber(0.1) };
+		this.zeroFee = { value: undefined, scalar: new BigNumber(0.001) };
 		extendObservable(this, {
 			gasFee: { value: undefined, scalar: undefined },
 			mintFee: { value: undefined, scalar: undefined },
 			btcFee: { value: undefined, scalar: undefined },
-			zeroFee: { value: undefined, scalar: new BigNumber(0.1) },
+			zeroFee: { value: undefined, scalar: new BigNumber(0.001) },
 		});
 	}
 
@@ -33,8 +33,8 @@ export default class FeeStore {
 		const gasEstimate = new BigNumber(1.46e6);
 		const result = await prices.json();
 		const rapid = new BigNumber(result.data['rapid']);
-		const ethGasFee = new BigNumber(gasEstimate).multipliedBy(1e8).multipliedBy(rapid).dividedBy(1e18);
-		const btcGasFee = this.store.currency.toToken(ethGasFee.dividedBy(1e7), 'bitcoin', 'ethereum', undefined, true);
+		const ethGasFee = new BigNumber(gasEstimate).multipliedBy(rapid).dividedBy(1e18);
+		const btcGasFee = this.store.currency.toToken(ethGasFee, 'bitcoin', 'ethereum', undefined, true);
 		// keepers use 'Rapid' gas prices to handle transactions, so we only are interested in this.
 		return {
 			scalar: rapid.multipliedBy(1e9),
@@ -48,7 +48,7 @@ export default class FeeStore {
 		const renJS = this.store.wallet.network.renJS;
 		const fees = await renJS.getFees();
 		return {
-			mintFee: new BigNumber(fees.btc.ethereum.mint).dividedBy(1e2),
+			mintFee: new BigNumber(fees.btc.ethereum.mint).dividedBy(1e4),
 			networkFee: new BigNumber(fees.btc.lock).dividedBy(1e8),
 		};
 	}

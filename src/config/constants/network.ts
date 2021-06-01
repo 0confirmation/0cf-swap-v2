@@ -1,4 +1,5 @@
 import type { NetworkConstants } from '../models/network';
+import { ChainId } from '@sushiswap/sdk';
 
 export const APP_NAME = '0cf';
 export const CONTACT_EMAIL = 'andrew@0confirmation.com';
@@ -10,11 +11,11 @@ export enum NETWORK_LIST {
 }
 
 export enum NETWORK_IDS {
-	ETH = 1,
-	BSC = 56,
-	MATIC = 137,
-	FTM = 250,
-	XDAI = 100,
+	ETH = ChainId.MAINNET,
+	BSC = ChainId.BSC,
+	MATIC = ChainId.MATIC,
+	FTM = ChainId.FANTOM,
+	XDAI = ChainId.XDAI,
 }
 
 export const NETWORK_CONSTANTS: NetworkConstants = {

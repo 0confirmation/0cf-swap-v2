@@ -1,10 +1,7 @@
 import type BigNumber from 'bignumber.js';
 
-export type PriceDetail = {
-	[id: string]: BigNumber;
-};
 export type PriceSummary = {
-	[id: string]: PriceDetail;
+	[id: string]: BigNumber;
 };
 export type ExchangeRateDetail = {
 	name: string;

@@ -19,7 +19,7 @@ export enum SUPPORTED_TOKEN_NAMES {
 	USDC = 'USD-Coin',
 	DAI = 'DAI',
 	ETH = 'Ethereum',
-	RENBTC = 'RenBTC',
+	WBTC = 'wBTC',
 }
 
 const ethTokens: TokenDefinition[] = [
@@ -46,9 +46,9 @@ const ethTokens: TokenDefinition[] = [
 		icon: ethIcon as unknown as IconifyIcon,
 	},
 	{
-		name: SUPPORTED_TOKEN_NAMES.RENBTC,
-		symbol: 'renBTC',
-		address: '0xEB4C2781e4ebA804CE9a9803C67d0893436bB27D',
+		name: SUPPORTED_TOKEN_NAMES.WBTC,
+		symbol: 'wBTC',
+		address: '0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599',
 		decimals: 8,
 		icon: btcIcon as unknown as IconifyIcon,
 	},
@@ -67,9 +67,10 @@ export const getTokens = (network?: NETWORK_LIST): TokenDefinition[] => {
 /* Returns a Sushiswap formatted token based on a token definition name
  * @param token = Token name on the supported token list
  */
-export const getSushiToken = (tokenName: SUPPORTED_TOKEN_NAMES, store: ZeroStore): SushiToken | undefined => {
+export const getSushiToken = (tokenName: string, store: ZeroStore): SushiToken | undefined => {
+	if (!store.currency) return undefined;
 	const { tokenMap } = store.currency;
-	const token = tokenMap ? tokenMap[tokenName] : null;
+	const token = tokenMap ? tokenMap[tokenName.toLowerCase()] : null;
 
 	return token
 		? new SushiToken(store.wallet.network.networkId, token.address, token.decimals, token.symbol, token.name)

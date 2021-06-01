@@ -18,6 +18,7 @@ export default class WalletStore {
 	public notify: NotifyAPI;
 	public currentBlock?: number;
 	public zero: typeof Zero | undefined;
+	public provider: ethers.providers.Web3Provider | undefined;
 
 	constructor(store: ZeroStore) {
 		this.network = getNetwork();
@@ -63,8 +64,10 @@ export default class WalletStore {
 		const walletState = wsOnboard.getState();
 		this.connectedAddress = walletState.address;
 		this.onboard = wsOnboard;
-		this._setZero(new ethers.providers.Web3Provider(walletState.wallet.provider));
+		this.provider = new ethers.providers.Web3Provider(walletState.wallet.provider);
+		this._setZero(this.provider);
 		this.store.fees.setFees();
+		this.store.currency.loadPrices();
 	});
 
 	disconnect = action(() => {
@@ -72,6 +75,7 @@ export default class WalletStore {
 		this.store.fees.clearFees();
 		this.zero = undefined;
 		this.onboard.walletReset();
+		this.provider = undefined;
 	});
 
 	/* Utilizes the user's provider to connect to the

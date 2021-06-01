@@ -42,7 +42,7 @@ export default class CurrencyStore {
 		// Refresh prices every minute
 		setInterval(() => {
 			this.loadPrices();
-		}, 1000 * 60);
+		}, 1000 * 6);
 	});
 
 	get tokenMap(): TokenMap | null | undefined {
@@ -54,7 +54,7 @@ export default class CurrencyStore {
 	});
 
 	loadPrices = action(async (): Promise<void> => {
-		this.prices = await fetchPrices();
+		this.prices = await fetchPrices(this.store);
 		this.btcExchangeRates = await fetchBtcExchangeRates();
 		if (!this.prices || !this.btcExchangeRates) return;
 
@@ -63,8 +63,8 @@ export default class CurrencyStore {
 		// We iterate through the coingecko return and assign
 		// the prices to the defined tokens.
 		Object.keys(this.prices).forEach((key) => {
-			if (this.prices && newTokenMap[key] && !!this.prices[key]['btc']) {
-				newTokenMap[key].setPrice(new BigNumber(this.prices[key]['btc']));
+			if (this.prices && newTokenMap[key] && !!this.prices[key]) {
+				newTokenMap[key].setPrice(this.prices[key]);
 			}
 		});
 
@@ -72,12 +72,7 @@ export default class CurrencyStore {
 
 		// After the iteration, we set bitcoin price from exchange
 		// rates as there is no token.
-		this.prices['bitcoin'] = {
-			usd: new BigNumber(this.btcExchangeRates.rates['usd'].value),
-			eth: new BigNumber(this.btcExchangeRates.rates['eth'].value),
-			cad: new BigNumber(this.btcExchangeRates.rates['cad'].value),
-			btc: new BigNumber(1),
-		};
+		this.prices['bitcoin'] = new BigNumber(1);
 	});
 
 	/* toToken accepts a value, input token and output token name and formatting options
@@ -105,7 +100,10 @@ export default class CurrencyStore {
 
 		if (!toToken || toToken.price.eq(0)) return '-';
 
-		const normal = value.multipliedBy(fromToken.price).dividedBy(toToken.price);
+		const normal =
+			fromName !== 'bitcoin'
+				? value.multipliedBy(toToken.price.dividedBy(fromToken.price))
+				: value.multipliedBy(toToken.price);
 		const decimals = preferredDecimals ?? toToken.decimals;
 
 		const fixedNormal = noCommas

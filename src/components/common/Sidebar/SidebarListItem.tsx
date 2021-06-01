@@ -53,13 +53,13 @@ export const SidebarListItem = (props: SidebarListItemProps): JSX.Element => {
 			disabled={disabled}
 			button
 			className={classes.listButton}
-			key={title}
+			key={`sidebar-${title}`}
 			onClick={() => {
 				// We only want the sidebar to close if
 				handleRoute(view, url);
 			}}
 		>
-			<ListItemText key={title} className={classes.listItemText} primary={title} disableTypography />
+			<ListItemText key={`text-${title}`} className={classes.listItemText} primary={title} disableTypography />
 		</ListItem>
 	);
 };

@@ -47,10 +47,9 @@ export const FeeDisplay = observer((props: SwapToProps): JSX.Element | null => {
 
 	const _calcProtocolFees = (): string => {
 		if (!mintFee.scalar || !gasFee.value || !zeroFee.scalar || !btcFee.value) return '0';
-
 		return bnAmount
-			.multipliedBy(mintFee.scalar.dividedBy(1e2))
-			.plus(bnAmount.multipliedBy(zeroFee.scalar.dividedBy(1e2)))
+			.multipliedBy(mintFee.scalar)
+			.plus(bnAmount.multipliedBy(zeroFee.scalar))
 			.plus(btcFee.value)
 			.toString();
 	};
@@ -60,8 +59,8 @@ export const FeeDisplay = observer((props: SwapToProps): JSX.Element | null => {
 
 		// TODO: include gas estimate in here
 		return bnAmount
-			.multipliedBy(mintFee.scalar.dividedBy(1e2))
-			.plus(bnAmount.multipliedBy(zeroFee.scalar.dividedBy(1e2)))
+			.multipliedBy(mintFee.scalar)
+			.plus(bnAmount.multipliedBy(zeroFee.scalar))
 			.plus(btcFee.value)
 			.plus(gasFee.value)
 			.toString();
@@ -78,11 +77,11 @@ export const FeeDisplay = observer((props: SwapToProps): JSX.Element | null => {
 		{
 			title: 'Protocol Fees',
 			secondaryTitle: [
-				`${mintFee.scalar}% renVM Mint`,
-				`${zeroFee.scalar}% Zero Loan`,
-				`${btcFee.value} BTC Miner Fee`,
+				`${mintFee.scalar ? mintFee.scalar.multipliedBy(1e2) : '-'}% renVM Mint`,
+				`${zeroFee.scalar ? zeroFee.scalar.multipliedBy(1e2) : '-'}% Zero Loan`,
+				`${btcFee.value ? btcFee.value : '-'} BTC Miner Fee`,
 			],
-			description: `${_calcTotalFee()} BTC`,
+			description: `${_calcProtocolFees()} BTC`,
 			secondaryDescription: `(${toToken(
 				new BigNumber(_calcProtocolFees()),
 				selectedCoin.toLowerCase(),
@@ -105,13 +104,24 @@ export const FeeDisplay = observer((props: SwapToProps): JSX.Element | null => {
 			} ${store.currency.tokenMap![selectedCoin.toLowerCase()].symbol})`,
 			collapsable: false,
 		},
+		{
+			title: 'Total Est. Fees',
+			description: `${_calcTotalFee()} BTC`,
+			secondaryDescription: `(${toToken(
+				new BigNumber(_calcTotalFee()),
+				selectedCoin.toLowerCase(),
+				'bitcoin',
+				2,
+			)}${' '} ${store.currency.tokenMap![selectedCoin.toLowerCase()].symbol})`,
+			collapsable: false,
+		},
 	];
 
 	const _getFees = () => {
 		return feeInfo.map((fee: FeeRowProps): JSX.Element => {
 			return (
 				<FeeRow
-					key={fee.title}
+					key={`feerow-${fee.title}`}
 					title={fee.title}
 					secondaryTitle={fee.secondaryTitle}
 					description={fee.description}

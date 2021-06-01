@@ -49,7 +49,7 @@ export class Token {
 			: new BigNumber(0);
 		const totalFees = btcFee.plus(zeroFee).plus(gasFee).plus(mintFee);
 
-		const finalAmount = amount.minus(totalFees).dividedBy(this.price);
+		const finalAmount = amount.multipliedBy(this.price).minus(totalFees.multipliedBy(this.price));
 
 		return noCommas
 			? finalAmount.toFixed(decimals, BigNumber.ROUND_HALF_FLOOR).toString()
@@ -74,7 +74,7 @@ export class Token {
 			: new BigNumber(0);
 		const totalFees = btcFee.plus(zeroFee).plus(gasFee).plus(mintFee);
 
-		const finalAmount = amount.multipliedBy(this.price).minus(totalFees);
+		const finalAmount = amount.minus(totalFees).dividedBy(this.price);
 
 		return noCommas
 			? finalAmount.toFixed(decimals, BigNumber.ROUND_HALF_FLOOR).toString()
