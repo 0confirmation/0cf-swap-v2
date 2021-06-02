@@ -5,6 +5,7 @@ import { observer } from 'mobx-react-lite';
 import { StoreContext } from '../../stores/ZeroStore';
 import { connect } from '../common/WalletButton';
 import PaymentModal from './PaymentModal';
+import { PaymentModalProps } from '../swap/PaymentButton';
 
 const useStyles = makeStyles((theme: Theme) => ({
 	submitButton: {
@@ -20,7 +21,7 @@ const useStyles = makeStyles((theme: Theme) => ({
 	},
 }));
 
-export const BitcoinPayment = observer((): JSX.Element => {
+export const BitcoinPayment = observer((props: PaymentModalProps): JSX.Element => {
 	const store = useContext(StoreContext);
 	const { connectedAddress } = store.wallet;
 	const classes = useStyles();
@@ -51,7 +52,7 @@ export const BitcoinPayment = observer((): JSX.Element => {
 			>
 				{!isActive() ? 'Connect Wallet' : 'Review Order'}
 			</Button>
-			<PaymentModal open={open} handleClose={handleClose} />
+			<PaymentModal open={open} handleClose={handleClose} {...props} />
 		</>
 	);
 });

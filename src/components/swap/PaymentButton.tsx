@@ -3,10 +3,20 @@ import { Grid } from '@material-ui/core';
 import { observer } from 'mobx-react-lite';
 import BitcoinPayment from '../bitcoin/BitcoinPayment';
 
-export const PaymentButton = observer(() => {
+export interface PaymentModalProps {
+	open?: boolean;
+	handleClose?: () => void;
+	fromAmount: string;
+	toAmount: string;
+	priceImpact: string;
+	fromCurrency: string;
+	toCurrency: string;
+}
+
+export const PaymentButton = observer((props: PaymentModalProps) => {
 	return (
 		<Grid container justify="center">
-			<BitcoinPayment />
+			<BitcoinPayment {...props} />
 		</Grid>
 	);
 });

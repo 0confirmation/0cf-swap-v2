@@ -77,6 +77,7 @@ export const Swap = observer(() => {
 	const [fromAmount, setFromAmount] = useState('0');
 	const [priceImpact, setPriceImpact] = useState('0');
 	const [updateSide, setUpdateSide] = useState('from');
+	const inputCurrency = 'BTC';
 
 	// If fees or price changes, we update the amounts displayed based
 	// on what the user had updated last
@@ -154,7 +155,7 @@ export const Swap = observer(() => {
 
 		if (trade) {
 			const executionAmount = bnAmount.multipliedBy(new BigNumber(trade.executionPrice.toFixed(6)));
-			const value = valueAfterFees(store, executionAmount, selectedCoin);
+			const value = valueAfterFees(store, executionAmount, selectedCoin, 4);
 			setPriceImpact(trade.priceImpact.toSignificant(2));
 			value && parseFloat(value) > 0 ? setToAmount(value) : setToAmount('0');
 		} else if (updateSide === 'to') {
@@ -172,7 +173,13 @@ export const Swap = observer(() => {
 					<Paper className={classes.infoPaper}>
 						<SwapFrom amount={fromAmount} handleFromAmount={handleFromAmount} />
 						<SwapTo onTokenChange={handleSelectedCoin} amount={toAmount} handleToAmount={handleToAmount} />
-						<PaymentButton />
+						<PaymentButton
+							fromAmount={fromAmount}
+							toAmount={toAmount}
+							fromCurrency={inputCurrency}
+							toCurrency={selectedCoin}
+							priceImpact={priceImpact}
+						/>
 						<FeeDisplay selectedCoin={selectedCoin} amount={fromAmount} priceImpact={priceImpact} />
 					</Paper>
 				</Grid>

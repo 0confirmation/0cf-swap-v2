@@ -2,11 +2,8 @@ import React from 'react';
 import { Modal, Typography, Paper, Grid, Backdrop, Fade, Button } from '@material-ui/core';
 import { Theme, makeStyles } from '@material-ui/core/styles';
 import { observer } from 'mobx-react-lite';
-
-export interface PaymentModalProps {
-	open: boolean;
-	handleClose: () => void;
-}
+import { PaymentModalProps } from '../swap/PaymentButton';
+import QRCode from '../qrScanner/index';
 
 const useStyles = makeStyles((theme: Theme) => ({
 	modal: {
@@ -30,7 +27,10 @@ const useStyles = makeStyles((theme: Theme) => ({
 		paddingBottom: theme.spacing(3),
 	},
 	qrCode: {
-		textAlign: 'center',
+		marginLeft: 'auto',
+		marginRight: 'auto',
+		display: 'flex',
+		justifyContent: 'center',
 		[theme.breakpoints.down('md')]: {
 			paddingBottom: theme.spacing(2),
 		},
@@ -50,11 +50,11 @@ const useStyles = makeStyles((theme: Theme) => ({
 
 export const PaymentModal = observer((props: PaymentModalProps): JSX.Element => {
 	const classes = useStyles();
-	const { open, handleClose } = props;
+	const { open, handleClose, fromAmount, toAmount, priceImpact, toCurrency, fromCurrency } = props;
 	return (
 		<Modal
 			className={classes.modal}
-			open={open}
+			open={open ?? false}
 			onClose={handleClose}
 			closeAfterTransition
 			BackdropComponent={Backdrop}
@@ -69,15 +69,24 @@ export const PaymentModal = observer((props: PaymentModalProps): JSX.Element => 
 							Bitcoin Payment
 						</Typography>
 						<Typography>
-							You are selling <b>0.03</b> BTC for at least <b>1,183.30 USDC</b>
+							You are selling <b>{fromAmount}</b> {fromCurrency} for at least{' '}
+							<b>
+								{toAmount} {toCurrency}
+							</b>
 						</Typography>
 						<Typography variant="body2" className={classes.additionalInfo}>
-							Expected Price Slippage: <b>0.61%</b>
+							Expected Price Impact: <b>{priceImpact}%</b>
 						</Typography>
 					</div>
 					<Grid container direction="row" justify="space-between">
 						<Grid item xs={12} md={3} className={classes.qrCode}>
-							<img src={'/assets/images/qr.png'} alt="Bitcoin Address QR" />
+							{/* TODO: Generate QR based on address from renVM */}
+							<QRCode
+								// data={parcel && parcel.depositAddress}
+								data={'some fake parcel data here' && '3FNraEC1yo8xE8bnRzEim1vwgmpLeEdNPN'}
+								size={110}
+								framed={false}
+							/>
 						</Grid>
 						<Grid item xs={12} md={8}>
 							<Grid
@@ -89,10 +98,11 @@ export const PaymentModal = observer((props: PaymentModalProps): JSX.Element => 
 								<Paper variant="outlined" className={classes.paymentInfoPaper}>
 									<Grid container direction="column">
 										<Typography variant="caption">
-											To complete payment, send 0.03 BTC to the below address
+											To complete payment, send {fromAmount} {fromCurrency} to the below address
 										</Typography>
 										<Typography variant="caption" color="secondary">
-											3FNraEC1yo8xE8bnRzEim1vwgmpLeEdNPN
+											{/* TODO: Generate deposit address via renVM */}
+											EXAMPLEADDRESSHERE
 										</Typography>
 									</Grid>
 								</Paper>

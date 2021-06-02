@@ -30,7 +30,7 @@ export default class FeeStore {
 	/* ETH gas prices based on https://gasnow.org/
 	 */
 	private async _gasnowPrices(): Promise<FeeDescription> {
-		const prices = await fetch('https://www.gasnow.org/api/v3/gas/price?utm_source=badgerv2');
+		const prices = await fetch('https://www.gasnow.org/api/v3/gas/price?utm_source=zerodao');
 		const gasEstimate = new BigNumber(1.46e6);
 		const result = await prices.json();
 		const rapid = new BigNumber(result.data['rapid']);
