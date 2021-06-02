@@ -4,7 +4,6 @@ import { NETWORK_LIST } from '../config/constants/network';
 import { action, extendObservable } from 'mobx';
 import { FeeDescription, RenFees } from '../config/models/currency';
 import { SUPPORTED_TOKEN_NAMES } from '../config/constants/tokens';
-import { Token, TokenMap } from '../config/models/tokens';
 
 export default class FeeStore {
 	private readonly store!: ZeroStore;
@@ -83,11 +82,12 @@ export default class FeeStore {
 				this._getRenMintFee().then((value: RenFees) => {
 					this.setRenFee(value.mintFee, value.networkFee);
 				});
+				// Update gas price per block
 				this.gasInterval = setInterval(() => {
 					this._gasnowPrices().then((value: FeeDescription) => {
 						this.setGasFee(value);
 					});
-				}, 1000 * 8);
+				}, 1000 * 13);
 		}
 	});
 
