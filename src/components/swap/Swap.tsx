@@ -114,7 +114,6 @@ export const Swap = observer(() => {
 
 	const handleSelectedCoin = async (name: SUPPORTED_TOKEN_NAMES) => {
 		setSelectedCoin(name);
-		handleFromAmount(fromAmount);
 	};
 
 	const handleToAmount = async (amount: string) => {
@@ -147,7 +146,7 @@ export const Swap = observer(() => {
 		setUpdateSide('from');
 		setFromAmount(amount);
 		await loadPrices();
-
+		console.log('setting from amount:', selectedCoin);
 		const bnAmount = new BigNumber(amount);
 		const trade = bnAmount.gt(0)
 			? await fetchTrade(store, SUPPORTED_TOKEN_NAMES.WBTC, selectedCoin, bnAmount, TradeType.EXACT_INPUT)
