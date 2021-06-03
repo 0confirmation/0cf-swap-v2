@@ -96,7 +96,7 @@ export const StatsDisplay = observer(() => {
 			</Grid>
 			<Grid container direction="row">
 				<Grid item xs={6} className={classes.statDescriptionContainer}>
-					<Typography className={classes.statDescription}>Confirmation Time</Typography>
+					<Typography className={classes.statDescription}>Time For 6 Confirmations</Typography>
 				</Grid>
 				<Grid item xs={6}>
 					<Grid container direction="row" justify="space-between" className={classes.statInfoRow}>
@@ -130,7 +130,7 @@ export const StatsDisplay = observer(() => {
 			</Grid>
 			<Grid container direction="row">
 				<Grid item xs={6} className={classes.statDescriptionContainer}>
-					<Typography className={classes.statDescription}>Value Difference</Typography>
+					<Typography className={classes.statDescription}>BTC Price Difference</Typography>
 					<Typography className={classes.subDescription}>(vs. ~{btcConfirmationTime} mins ago)</Typography>
 				</Grid>
 				<Grid item xs={6}>
