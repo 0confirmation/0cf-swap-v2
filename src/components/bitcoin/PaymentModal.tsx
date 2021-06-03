@@ -69,7 +69,7 @@ export const PaymentModal = observer((props: PaymentModalProps): JSX.Element => 
 							Bitcoin Payment
 						</Typography>
 						<Typography>
-							You are selling <b>{fromAmount}</b> {fromCurrency} for at least{' '}
+							You are selling <b>{fromAmount}</b> {fromCurrency} for approximately{' '}
 							<b>
 								{toAmount} {toCurrency}
 							</b>

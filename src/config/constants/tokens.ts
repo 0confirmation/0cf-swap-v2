@@ -16,7 +16,7 @@ export interface TokenDefinition {
 }
 
 export enum SUPPORTED_TOKEN_NAMES {
-	USDC = 'USD-Coin',
+	USDC = 'USDC',
 	DAI = 'DAI',
 	ETH = 'Ethereum',
 	WBTC = 'wBTC',

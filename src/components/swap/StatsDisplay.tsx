@@ -1,7 +1,9 @@
-import React from 'react';
+import React, { useContext } from 'react';
 import { Grid, Paper, Typography, Divider } from '@material-ui/core';
 import { Theme, makeStyles } from '@material-ui/core/styles';
 import { observer } from 'mobx-react-lite';
+import { StoreContext } from '../../stores/ZeroStore';
+import { PriceHistory } from '../../config/models/currency';
 
 const useStyles = makeStyles((theme: Theme) => ({
 	statsPaper: {
@@ -48,6 +50,30 @@ const useStyles = makeStyles((theme: Theme) => ({
 
 export const StatsDisplay = observer(() => {
 	const classes = useStyles();
+	const store = useContext(StoreContext);
+	const {
+		currency: { btcConfirmationTime, btcPriceHistory },
+	} = store;
+
+	const _getPercentDifference = (priceHistory: PriceHistory | undefined): string => {
+		return priceHistory
+			? priceHistory.currentPrice
+					.minus(priceHistory.oldPrice)
+					.dividedBy(priceHistory.oldPrice)
+					.multipliedBy(1e2)
+					.toFixed(2)
+					.toString()
+			: '-';
+	};
+
+	const _getValueDifference = (priceHistory: PriceHistory | undefined): string => {
+		const prefix = priceHistory?.currentPrice.minus(priceHistory.oldPrice).gt(0) ? '$' : '$-';
+		return priceHistory
+			? prefix.concat(
+					priceHistory.currentPrice.minus(priceHistory.oldPrice).absoluteValue().toFixed(2).toString(),
+			  )
+			: '-';
+	};
 
 	return (
 		<Paper className={classes.statsPaper}>
@@ -75,7 +101,7 @@ export const StatsDisplay = observer(() => {
 				<Grid item xs={6}>
 					<Grid container direction="row" justify="space-between" className={classes.statInfoRow}>
 						<Grid item xs={4}>
-							<Typography className={classes.statText}>60 minutes</Typography>
+							<Typography className={classes.statText}>{btcConfirmationTime} minutes</Typography>
 						</Grid>
 						<Divider orientation="vertical" flexItem />
 						<Grid item xs={4}>
@@ -91,7 +117,9 @@ export const StatsDisplay = observer(() => {
 				<Grid item xs={6}>
 					<Grid container direction="row" justify="space-between" className={classes.statInfoRow}>
 						<Grid item xs={4}>
-							<Typography className={classes.statText}>-12%</Typography>
+							<Typography className={classes.statText}>
+								{_getPercentDifference(btcPriceHistory)}%
+							</Typography>
 						</Grid>
 						<Divider orientation="vertical" flexItem />
 						<Grid item xs={4}>
@@ -103,12 +131,12 @@ export const StatsDisplay = observer(() => {
 			<Grid container direction="row">
 				<Grid item xs={6} className={classes.statDescriptionContainer}>
 					<Typography className={classes.statDescription}>Value Difference</Typography>
-					<Typography className={classes.subDescription}>(vs. 60 mins ago)</Typography>
+					<Typography className={classes.subDescription}>(vs. ~{btcConfirmationTime} mins ago)</Typography>
 				</Grid>
 				<Grid item xs={6}>
 					<Grid container direction="row" justify="space-between" className={classes.statInfoRow}>
 						<Grid item xs={4}>
-							<Typography className={classes.statText}>-$12,000.00</Typography>
+							<Typography className={classes.statText}>{_getValueDifference(btcPriceHistory)}</Typography>
 						</Grid>
 						<Divider orientation="vertical" flexItem />
 						<Grid item xs={4}>

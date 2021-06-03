@@ -1,7 +1,7 @@
 import { action, extendObservable } from 'mobx';
 import type { ZeroStore } from './ZeroStore';
-import { fetchPrices, numberWithCommas } from '../utils/helpers';
-import type { PriceSummary } from '../config/models/currency';
+import { fetchBtcConfirmationTime, fetchBtcPriceHistory, fetchPrices, numberWithCommas } from '../utils/helpers';
+import type { PriceHistory, PriceSummary } from '../config/models/currency';
 import type { TokenMap } from '../config/models/tokens';
 import { SUPPORTED_TOKEN_NAMES, TokenDefinition } from '../config/constants/tokens';
 import { Token } from '../config/models/tokens';
@@ -12,15 +12,21 @@ export default class CurrencyStore {
 	public prices: PriceSummary | null | undefined;
 	public tokens: Token[];
 	public tokenMapCache: TokenMap;
+	public btcConfirmationTime: string | undefined;
+	public btcPriceHistory: PriceHistory | undefined;
 
 	constructor(store: ZeroStore) {
 		this.store = store;
 		this.prices = undefined;
 		this.tokenMapCache = {};
+		this.btcConfirmationTime = undefined;
+		this.btcPriceHistory = undefined;
 
 		extendObservable(this, {
 			prices: undefined,
 			tokenMapCache: undefined,
+			btcConfirmationTime: undefined,
+			btcPriceHistory: undefined,
 		});
 
 		this.tokens = this.store.wallet.network.tokens.map((token: TokenDefinition) => {
@@ -33,6 +39,7 @@ export default class CurrencyStore {
 
 	init = action(async (): Promise<void> => {
 		await this.loadPrices();
+		await this.loadBtcBlockTime();
 	});
 
 	get tokenMap(): TokenMap | null | undefined {
@@ -51,6 +58,14 @@ export default class CurrencyStore {
 		token.setPrice(price);
 	});
 
+	setBtcConfirmationTime = action((time: string): void => {
+		this.btcConfirmationTime = time;
+	});
+
+	setBtcPriceHistory = action((prices: PriceHistory | undefined) => {
+		this.btcPriceHistory = prices;
+	});
+
 	loadPrices = action(async (): Promise<void> => {
 		this.setPrices(await fetchPrices(this.store));
 		if (!this.prices) return;
@@ -66,6 +81,12 @@ export default class CurrencyStore {
 		});
 
 		this.setTokenMap(newTokenMap);
+	});
+
+	loadBtcBlockTime = action(async (): Promise<void> => {
+		const confirmationTime = await fetchBtcConfirmationTime();
+		this.setBtcPriceHistory(await fetchBtcPriceHistory(confirmationTime));
+		this.setBtcConfirmationTime(confirmationTime);
 	});
 
 	/* toToken accepts a value, input token and output token name and formatting options

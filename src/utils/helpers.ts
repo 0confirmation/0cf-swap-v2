@@ -1,9 +1,46 @@
-import type { PriceSummary } from '../config/models/currency';
+import type { PriceHistory, PriceSummary } from '../config/models/currency';
 import BigNumber from 'bignumber.js';
 import type { ZeroStore } from '../stores/ZeroStore';
 import { getSushiToken, SUPPORTED_TOKEN_NAMES } from '../config/constants/tokens';
 import { Route as SushiRoute, Fetcher, Pair, Route, Trade, TokenAmount, TradeType } from '@sushiswap/sdk';
 import { BaseProvider } from '@ethersproject/providers';
+
+// ============== BTC HELPERS ==============
+
+/* Returns the most recent price and the price that is as close to 6 confirmations away from current price
+ * @param confirmationTime = time in minutes that it takes for 6 confirmation
+ */
+export const fetchBtcPriceHistory = async (confirmationTime: string): Promise<PriceHistory | undefined> => {
+	const numConfTime = parseFloat(confirmationTime);
+	if (isNaN(numConfTime)) return undefined;
+	const oldPriceIndex = Math.ceil(numConfTime / 5) + 1;
+
+	const cgResponse: number[] | null = await fetchData(() =>
+		fetch('https://api.coingecko.com/api/v3/coins/bitcoin/market_chart?vs_currency=usd&days=.1&interval=minute'),
+	);
+	const prices = cgResponse ? cgResponse['prices'] : undefined;
+
+	// Coingecko returns data in oldest -> newest format so we pull data from the end
+	return prices
+		? {
+				currentPrice: new BigNumber(prices[prices.length - 1][1]),
+				oldPrice: new BigNumber(prices[prices.length - oldPriceIndex][1]),
+		  }
+		: undefined;
+};
+
+/* Pulls the average block length in minutes and returns the time it takes for 6 confirmations on average
+ */
+export const fetchBtcConfirmationTime = async (): Promise<string> => {
+	const stats: { [key: string]: string } | null = await fetchData(() =>
+		fetch(`https://blockchain.info/stats?format=json&cors=true`),
+	);
+
+	const blockLengthMinutes = stats ? parseFloat(stats['minutes_between_blocks']) : 60;
+	return (blockLengthMinutes * 6).toFixed(1);
+};
+
+// ============== SUSHI HELPERS ==============
 
 /* Get the pair data to create routes and return the sushiswap route data
  * from the sushi SDK.
@@ -46,6 +83,7 @@ export const fetchPair = async (
 	const toToken = getSushiToken(toName, store);
 	if (!fromToken || !toToken || !store.wallet.connectedAddress) return undefined;
 
+	console.log('check:', fromToken, toToken, store.wallet.provider);
 	return Fetcher.fetchPairData(fromToken, toToken, store.wallet.provider as BaseProvider);
 };
 
@@ -99,10 +137,53 @@ export const fetchTrade = async (
 	return trade;
 };
 
-// Breaks down a provided number and inserts appropriately placed
-// commas to make a number more human readable
+// ============== ZERO HELPERS ==============
+
+/* Returns a string formatted estimation of the value you'd receive after fees
+ * @param store = ZeroStore instance for network specifics
+ * @param amount = BigNumber execution price of the swap
+ * @param decimals = amount of decimals to format the string to
+ * @param noCommas = boolean to flag if the return should be comma formatted
+ */
+export const valueAfterFees = (
+	store: ZeroStore,
+	amount: BigNumber,
+	currency: SUPPORTED_TOKEN_NAMES,
+	decimals = 8,
+	noCommas = false,
+): string | null => {
+	const fees = store.fees.getAllFees(store, amount, currency);
+	const finalAmount = amount.minus(fees ?? new BigNumber(0));
+
+	return noCommas
+		? finalAmount.toFixed(decimals, BigNumber.ROUND_HALF_FLOOR).toString()
+		: numberWithCommas(finalAmount.toFixed(decimals, BigNumber.ROUND_HALF_FLOOR)).toString();
+};
+
+/* General purpose fetch that returns a JSON formatted response or null if there's an error
+ * @param request = Promise to await
+ */
+export const fetchData = async <T>(request: () => Promise<Response>): Promise<T | null> => {
+	try {
+		const response = await request();
+		if (!response.ok) {
+			return null;
+		}
+		// purposefully await to use try / catch
+		return await response.json();
+	} catch (err) {
+		console.log('error', err);
+		return null;
+	}
+};
+
+// ============== GENERAL HELPERS ==============
+
+/* Breaks down a provided number and inserts appropriately placed commas to make a number more human readable
+ * @param x = string formatted number to modify with commas
+ */
 export const numberWithCommas = (x: string): string => {
-	const parts = x.toString().split('.');
+	const parts = x.split('.');
 	parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ',');
 	return parts.join('.');
 };
@@ -127,25 +208,4 @@ export const coerceInputToNumber = (newValue: string, oldValue: string) => {
 	} else {
 		return newValue;
 	}
-};
-
-/* Returns a string formatted estimation of the value you'd receive after fees
- * @param store = ZeroStore instance for network specifics
- * @param amount = BigNumber execution price of the swap
- * @param decimals = amount of decimals to format the string to
- * @param noCommas = boolean to flag if the return should be comma formatted
- */
-export const valueAfterFees = (
-	store: ZeroStore,
-	amount: BigNumber,
-	currency: SUPPORTED_TOKEN_NAMES,
-	decimals = 8,
-	noCommas = false,
-): string | null => {
-	const fees = store.fees.getAllFees(store, amount, currency);
-	const finalAmount = amount.minus(fees ?? new BigNumber(0));
-
-	return noCommas
-		? finalAmount.toFixed(decimals, BigNumber.ROUND_HALF_FLOOR).toString()
-		: numberWithCommas(finalAmount.toFixed(decimals, BigNumber.ROUND_HALF_FLOOR)).toString();
 };

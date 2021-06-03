@@ -11,3 +11,8 @@ export type RenFees = {
 	mintFee: BigNumber;
 	networkFee: BigNumber;
 };
+
+export interface PriceHistory {
+	currentPrice: BigNumber;
+	oldPrice: BigNumber;
+}
