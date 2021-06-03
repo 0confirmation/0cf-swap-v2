@@ -54,7 +54,16 @@ export default class WalletStore {
 			zero: undefined,
 			gasFee: undefined,
 		});
+
+		this.init();
 	}
+
+	init = action(async () => {
+		const previouslySelectedWallet = window.localStorage.getItem('selectedWallet');
+		if (previouslySelectedWallet != null) {
+			await this.onboard.walletSelect(previouslySelectedWallet);
+		}
+	});
 
 	isCached = action(() => {
 		return !!this.connectedAddress || !!window.localStorage.getItem('selectedWallet');
@@ -77,6 +86,7 @@ export default class WalletStore {
 		this.zero = undefined;
 		this.onboard.walletReset();
 		this.provider = undefined;
+		if (this.isCached()) window.localStorage.removeItem('selectedWallet');
 	});
 
 	/* Utilizes the user's provider to connect to the
