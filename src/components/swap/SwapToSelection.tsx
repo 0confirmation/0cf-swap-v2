@@ -1,8 +1,9 @@
 import React, { useContext, useState, useEffect } from 'react';
 import { Select, MenuItem } from '@material-ui/core';
 import { StoreContext } from '../../stores/ZeroStore';
-import { getTokens, SUPPORTED_TOKEN_NAMES, TokenDefinition } from '../../config/constants/tokens';
+import { SUPPORTED_TOKEN_NAMES, TokenDefinition } from '../../config/constants/tokens';
 import { SwapDisplay } from './SwapDisplay';
+import { getTokens } from '../../utils/helpers';
 import { Theme, makeStyles } from '@material-ui/core/styles';
 
 export interface SelectionProps {

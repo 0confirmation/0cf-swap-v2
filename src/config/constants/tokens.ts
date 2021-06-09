@@ -3,9 +3,6 @@ import daiIcon from '@iconify/icons-cryptocurrency/dai';
 import ethIcon from '@iconify/icons-cryptocurrency/eth';
 import btcIcon from '@iconify/icons-cryptocurrency/btc';
 import type { IconifyIcon } from '@iconify/react';
-import { NETWORK_LIST } from './network';
-import { Token as SushiToken } from '@sushiswap/sdk';
-import { ZeroStore } from '../../stores/ZeroStore';
 
 export interface TokenDefinition {
 	name: SUPPORTED_TOKEN_NAMES;
@@ -22,7 +19,7 @@ export enum SUPPORTED_TOKEN_NAMES {
 	WBTC = 'wBTC',
 }
 
-const ethTokens: TokenDefinition[] = [
+export const ETH_TOKENS: TokenDefinition[] = [
 	{
 		name: SUPPORTED_TOKEN_NAMES.USDC,
 		symbol: 'USDC',
@@ -54,24 +51,19 @@ const ethTokens: TokenDefinition[] = [
 	},
 ];
 
-/* Returns a list of token definitions based on the input network
- * @param network (optional) = Name of network to return tokens for, default Ethereum
- */
-export const getTokens = (network?: NETWORK_LIST): TokenDefinition[] => {
-	switch (network) {
-		default:
-			return ethTokens;
-	}
-};
-
-/* Returns a Sushiswap formatted token based on a token definition name
- * @param token = Token name on the supported token list
- */
-export const getSushiToken = (tokenName: string, store: ZeroStore): SushiToken | undefined => {
-	if (!store.currency) return undefined;
-	const { tokenMap } = store.currency;
-	const token = tokenMap ? tokenMap[tokenName] : null;
-	return token
-		? new SushiToken(store.wallet.network.networkId, token.address, token.decimals, token.symbol, token.name)
-		: undefined;
-};
+export const BSC_TOKENS: TokenDefinition[] = [
+	{
+		name: SUPPORTED_TOKEN_NAMES.USDC,
+		symbol: 'USDC',
+		address: '0x8AC76a51cc950d9822D68b83fE1Ad97B32Cd580d',
+		decimals: 18,
+		icon: usdcIcon as unknown as IconifyIcon,
+	},
+	{
+		name: SUPPORTED_TOKEN_NAMES.DAI,
+		symbol: 'DAI',
+		address: '0x1AF3F329e8BE154074D8769D1FFa4eE058B1DBc3',
+		decimals: 18,
+		icon: daiIcon as unknown as IconifyIcon,
+	},
+];

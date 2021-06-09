@@ -1,5 +1,6 @@
 import { NETWORK_LIST, NETWORK_IDS } from '../constants/network';
-import { getTokens, TokenDefinition } from '../constants/tokens';
+import { TokenDefinition } from '../constants/tokens';
+import { getTokens } from '../../utils/helpers';
 import RenJS from '@renproject/ren';
 
 export type NetworkConstants = {
@@ -34,5 +35,6 @@ export class BscNetwork implements Network {
 	readonly networkId = NETWORK_IDS.BSC;
 	readonly fullName = 'Binance Smart Chain';
 	public tokens = getTokens(NETWORK_LIST.ETH);
-	public renJS = new RenJS('bscMainnet');
+	// TODO: Find out the proper name for bsc mainnet in renJS
+	public renJS = new RenJS('mainnet');
 }

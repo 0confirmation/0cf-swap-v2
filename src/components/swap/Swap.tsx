@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState } from 'react';
+import React, { ChangeEvent, MouseEvent, useContext, useEffect, useState } from 'react';
 import { Grid, Container, Paper } from '@material-ui/core';
 import { DRAWER_WIDTH } from '../../config/constants/ui';
 import { navHeight } from '../common/Navbar/Navbar';
@@ -14,6 +14,7 @@ import StatsDisplay from './StatsDisplay';
 import { BigNumber } from 'bignumber.js';
 import { fetchTrade, numberWithCommas, valueAfterFees } from '../../utils/helpers';
 import { TradeType } from '@sushiswap/sdk';
+import { GasReserve } from './GasReserve';
 
 const useStyles = makeStyles((theme: Theme) => ({
 	mainContainer: {
@@ -77,6 +78,8 @@ export const Swap = observer(() => {
 	const [fromAmount, setFromAmount] = useState('0');
 	const [priceImpact, setPriceImpact] = useState('0');
 	const [updateSide, setUpdateSide] = useState('from');
+	const [checked, setChecked] = useState(false);
+	const [reserveAmount, setReserveAmount] = useState(0);
 	const inputCurrency = 'BTC';
 
 	// If fees or price changes, we update the amounts displayed based
@@ -146,7 +149,6 @@ export const Swap = observer(() => {
 		setUpdateSide('from');
 		setFromAmount(amount);
 		await loadPrices();
-		console.log('setting from amount:', selectedCoin);
 		const bnAmount = new BigNumber(amount);
 		const trade = bnAmount.gt(0)
 			? await fetchTrade(store, SUPPORTED_TOKEN_NAMES.WBTC, selectedCoin, bnAmount, TradeType.EXACT_INPUT)
@@ -165,6 +167,20 @@ export const Swap = observer(() => {
 		}
 	};
 
+	const handleChecked = (_: ChangeEvent<HTMLInputElement>, checked: boolean) => {
+		setChecked(checked);
+		// If the user checks the box, set their initial reserve amount, else clear it
+		if (checked) {
+			setReserveAmount(0.01);
+		} else {
+			setReserveAmount(0);
+		}
+	};
+
+	const handleReserveAmount = (_: MouseEvent<HTMLElement, globalThis.MouseEvent>, amount: number) => {
+		setReserveAmount(amount);
+	};
+
 	return (
 		<Container className={classes.mainContainer}>
 			<Grid item className={classes.swapContainer}>
@@ -178,6 +194,12 @@ export const Swap = observer(() => {
 							fromCurrency={inputCurrency}
 							toCurrency={selectedCoin}
 							priceImpact={priceImpact}
+						/>
+						<GasReserve
+							checked={checked}
+							reserveAmount={reserveAmount}
+							handleChecked={handleChecked}
+							handleReserveAmount={handleReserveAmount}
 						/>
 						<FeeDisplay selectedCoin={selectedCoin} amount={fromAmount} priceImpact={priceImpact} />
 					</Paper>

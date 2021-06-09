@@ -1,9 +1,11 @@
 import type { PriceHistory, PriceSummary } from '../config/models/currency';
 import BigNumber from 'bignumber.js';
 import type { ZeroStore } from '../stores/ZeroStore';
-import { getSushiToken, SUPPORTED_TOKEN_NAMES } from '../config/constants/tokens';
+import { BSC_TOKENS, ETH_TOKENS, SUPPORTED_TOKEN_NAMES, TokenDefinition } from '../config/constants/tokens';
 import { Route as SushiRoute, Fetcher, Pair, Route, Trade, TokenAmount, TradeType } from '@sushiswap/sdk';
+import { Token as SushiToken } from '@sushiswap/sdk';
 import { BaseProvider } from '@ethersproject/providers';
+import { NETWORK_LIST } from '../config/constants/network';
 
 // ============== BTC HELPERS ==============
 
@@ -41,6 +43,30 @@ export const fetchBtcConfirmationTime = async (): Promise<string> => {
 };
 
 // ============== SUSHI HELPERS ==============
+
+/* Returns a list of token definitions based on the input network
+ * @param network (optional) = Name of network to return tokens for, default Ethereum
+ */
+export const getTokens = (network?: NETWORK_LIST): TokenDefinition[] => {
+	switch (network) {
+		case NETWORK_LIST.BSC:
+			return BSC_TOKENS;
+		default:
+			return ETH_TOKENS;
+	}
+};
+
+/* Returns a Sushiswap formatted token based on a token definition name
+ * @param token = Token name on the supported token list
+ */
+export const getSushiToken = (tokenName: string, store: ZeroStore): SushiToken | undefined => {
+	if (!store.currency) return undefined;
+	const { tokenMap } = store.currency;
+	const token = tokenMap ? tokenMap[tokenName] : null;
+	return token
+		? new SushiToken(store.wallet.network.networkId, token.address, token.decimals, token.symbol, token.name)
+		: undefined;
+};
 
 /* Get the pair data to create routes and return the sushiswap route data
  * from the sushi SDK.
@@ -83,7 +109,6 @@ export const fetchPair = async (
 	const toToken = getSushiToken(toName, store);
 	if (!fromToken || !toToken || !store.wallet.connectedAddress) return undefined;
 
-	console.log('check:', fromToken, toToken, store.wallet.provider);
 	return Fetcher.fetchPairData(fromToken, toToken, store.wallet.provider as BaseProvider);
 };
 
