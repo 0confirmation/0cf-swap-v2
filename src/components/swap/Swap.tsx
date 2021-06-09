@@ -178,7 +178,7 @@ export const Swap = observer(() => {
 	};
 
 	const handleReserveAmount = (_: MouseEvent<HTMLElement, globalThis.MouseEvent>, amount: number) => {
-		setReserveAmount(amount);
+		if (amount !== null) setReserveAmount(amount);
 	};
 
 	return (
