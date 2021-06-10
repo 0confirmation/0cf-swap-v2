@@ -1,6 +1,12 @@
 import { action, extendObservable } from 'mobx';
 import type { ZeroStore } from './ZeroStore';
-import { fetchBtcConfirmationTime, fetchBtcPriceHistory, fetchPrices, numberWithCommas } from '../utils/helpers';
+import {
+	fetchBtcBlockHeight,
+	fetchBtcConfirmationTime,
+	fetchBtcPriceHistory,
+	fetchPrices,
+	numberWithCommas,
+} from '../utils/helpers';
 import type { PriceHistory, PriceSummary } from '../config/models/currency';
 import type { TokenMap } from '../config/models/tokens';
 import { SUPPORTED_TOKEN_NAMES, TokenDefinition } from '../config/constants/tokens';
@@ -14,6 +20,7 @@ export default class CurrencyStore {
 	public tokenMapCache: TokenMap;
 	public btcConfirmationTime: string | undefined;
 	public btcPriceHistory: PriceHistory | undefined;
+	public btcBlockHeight: number | undefined;
 
 	constructor(store: ZeroStore) {
 		this.store = store;
@@ -21,12 +28,14 @@ export default class CurrencyStore {
 		this.tokenMapCache = {};
 		this.btcConfirmationTime = undefined;
 		this.btcPriceHistory = undefined;
+		this.btcBlockHeight = undefined;
 
 		extendObservable(this, {
 			prices: undefined,
 			tokenMapCache: undefined,
 			btcConfirmationTime: undefined,
 			btcPriceHistory: undefined,
+			btcBlockHeight: undefined,
 		});
 
 		this.tokens = this.store.wallet.network.tokens.map((token: TokenDefinition) => {
@@ -40,6 +49,7 @@ export default class CurrencyStore {
 	init = action(async (): Promise<void> => {
 		await this.loadPrices();
 		await this.loadBtcBlockTime();
+		await this.loadBtcBlockHeight();
 	});
 
 	get tokenMap(): TokenMap | null | undefined {
@@ -66,6 +76,10 @@ export default class CurrencyStore {
 		this.btcPriceHistory = prices;
 	});
 
+	setBtcBlockHeight = action((blockHeight: number | undefined) => {
+		this.btcBlockHeight = blockHeight;
+	});
+
 	loadPrices = action(async (): Promise<void> => {
 		this.setPrices(await fetchPrices(this.store));
 		if (!this.prices) return;
@@ -87,6 +101,10 @@ export default class CurrencyStore {
 		const confirmationTime = await fetchBtcConfirmationTime();
 		this.setBtcPriceHistory(await fetchBtcPriceHistory(confirmationTime));
 		this.setBtcConfirmationTime(confirmationTime);
+	});
+
+	loadBtcBlockHeight = action(async (): Promise<void> => {
+		this.setBtcBlockHeight(await fetchBtcBlockHeight());
 	});
 
 	/* toToken accepts a value, input token and output token name and formatting options

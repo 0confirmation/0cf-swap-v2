@@ -180,7 +180,6 @@ export const Swap = observer(() => {
 	const handleReserveAmount = (_: MouseEvent<HTMLElement, globalThis.MouseEvent>, amount: number) => {
 		if (amount !== null) setReserveAmount(amount);
 	};
-
 	return (
 		<Container className={classes.mainContainer}>
 			<Grid item className={classes.swapContainer}>

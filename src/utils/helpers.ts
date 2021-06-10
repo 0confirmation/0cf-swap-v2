@@ -31,6 +31,13 @@ export const fetchBtcPriceHistory = async (confirmationTime: string): Promise<Pr
 		: undefined;
 };
 
+/* Returns the most recent block height of the longest chain on the BTC blockchain.
+ */
+export const fetchBtcBlockHeight = async (): Promise<number | undefined> => {
+	const response: number | null | undefined = await fetchData(() => fetch('https://blockchain.info/q/getblockcount'));
+	return response ?? undefined;
+};
+
 /* Pulls the average block length in minutes and returns the time it takes for 6 confirmations on average
  */
 export const fetchBtcConfirmationTime = async (): Promise<string> => {

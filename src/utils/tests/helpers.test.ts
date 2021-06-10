@@ -167,6 +167,22 @@ describe('fetchBtcPriceHistory', () => {
 	);
 });
 
+describe('fetchBtcBlockHeight', () => {
+	const mockData = 687073;
+
+	beforeEach(() => {
+		const mockFetch = getMockFetch(mockData);
+		global.fetch = mockFetch;
+	});
+
+	test('Returns Correct BTC Confirmation Time', async () => {
+		const confTime = await helpers.fetchBtcBlockHeight();
+		const expected = 687073;
+		expect(fetch).toBeCalledTimes(1);
+		expect(confTime).toBe(expected);
+	});
+});
+
 describe('getTokens', () => {
 	test.each([
 		[NETWORK_LIST.ETH, ETH_TOKENS],
