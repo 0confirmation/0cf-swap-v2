@@ -3,7 +3,7 @@ import { Theme, makeStyles } from '@material-ui/core/styles';
 import { Paper } from '@material-ui/core';
 import { observer } from 'mobx-react-lite';
 import BigNumber from 'bignumber.js';
-import { StoreContext } from '../../stores/ZeroStore';
+import { StoreContext } from '../../stores/Store';
 import { SUPPORTED_TOKEN_NAMES } from '../../config/constants/tokens';
 import FeeRow, { FeeRowProps } from './FeeRow';
 

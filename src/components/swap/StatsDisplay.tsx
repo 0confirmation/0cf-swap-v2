@@ -2,7 +2,7 @@ import React, { useContext } from 'react';
 import { Grid, Paper, Typography, Divider } from '@material-ui/core';
 import { Theme, makeStyles } from '@material-ui/core/styles';
 import { observer } from 'mobx-react-lite';
-import { StoreContext } from '../../stores/ZeroStore';
+import { StoreContext } from '../../stores/Store';
 import { PriceHistory } from '../../config/models/currency';
 
 const useStyles = makeStyles((theme: Theme) => ({

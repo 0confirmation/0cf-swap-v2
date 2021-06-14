@@ -1,7 +1,7 @@
 import { createStyles, ListItem, ListItemText, makeStyles, Theme } from '@material-ui/core';
 import type { Route } from 'mobx-router';
 import React, { useContext } from 'react';
-import { StoreContext, ZeroStore } from '../../../stores/ZeroStore';
+import { StoreContext, Store } from '../../../stores/Store';
 
 const useStyles = makeStyles((theme: Theme) =>
 	createStyles({
@@ -23,7 +23,7 @@ const useStyles = makeStyles((theme: Theme) =>
 
 interface SidebarListItemProps {
 	title: string;
-	view: Route<ZeroStore> | undefined;
+	view: Route<Store> | undefined;
 	url: string | undefined;
 	disabled: boolean;
 }
@@ -35,10 +35,7 @@ export const SidebarListItem = (props: SidebarListItemProps): JSX.Element => {
 	const { goTo } = store.router;
 	const { collapsedHeader, toggleSidebar } = store.ui;
 
-	const handleRoute = (
-		path: Route<ZeroStore, any, any> | undefined,
-		url: string | undefined,
-	): Promise<void> | void => {
+	const handleRoute = (path: Route<Store, any, any> | undefined, url: string | undefined): Promise<void> | void => {
 		if (!collapsedHeader) toggleSidebar();
 		if (path) {
 			return goTo(path);

@@ -1,5 +1,5 @@
 import { action, extendObservable } from 'mobx';
-import type { ZeroStore } from './ZeroStore';
+import type { Store } from './Store';
 import {
 	fetchBtcBlockHeight,
 	fetchBtcConfirmationTime,
@@ -14,7 +14,7 @@ import { Token } from '../config/models/tokens';
 import BigNumber from 'bignumber.js';
 
 export default class CurrencyStore {
-	private readonly store!: ZeroStore;
+	private readonly store!: Store;
 	public prices: PriceSummary | null | undefined;
 	public tokens: Token[];
 	public tokenMapCache: TokenMap;
@@ -22,7 +22,7 @@ export default class CurrencyStore {
 	public btcPriceHistory: PriceHistory | undefined;
 	public btcBlockHeight: number | undefined;
 
-	constructor(store: ZeroStore) {
+	constructor(store: Store) {
 		this.store = store;
 		this.prices = undefined;
 		this.tokenMapCache = {};
@@ -82,13 +82,7 @@ export default class CurrencyStore {
 
 	loadPrices = action(async (): Promise<void> => {
 		this.setPrices(await fetchPrices(this.store));
-		if (!this.prices) {
-			setTimeout(async () => {
-				console.log('retrying load prices');
-				await this.init();
-			}, 5000);
-			return;
-		}
+		if (!this.prices) return;
 
 		const newTokenMap = this.tokenMapCache;
 

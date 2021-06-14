@@ -1,15 +1,15 @@
 import { action, extendObservable } from 'mobx';
 import { COLLAPSE_WIDTH } from '../config/constants/ui';
-import type { ZeroStore } from './ZeroStore';
+import type { Store } from './Store';
 
 export default class UiStore {
-	private readonly store!: ZeroStore;
+	private readonly store!: Store;
 
 	public sidebarOpen!: boolean;
 	public collapsedHeader: boolean;
 	public darkMode: boolean;
 
-	constructor(store: ZeroStore) {
+	constructor(store: Store) {
 		this.store = store;
 		this.collapsedHeader = window.innerWidth >= COLLAPSE_WIDTH;
 		this.darkMode = false;

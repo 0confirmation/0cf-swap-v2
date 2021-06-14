@@ -3,7 +3,7 @@ import { Drawer, List, Toolbar, Grid } from '@material-ui/core';
 import { createStyles, Theme, makeStyles } from '@material-ui/core/styles';
 import { DRAWER_WIDTH } from '../../../config/constants/ui';
 import { useContext } from 'react';
-import { StoreContext } from '../../../stores/ZeroStore';
+import { StoreContext } from '../../../stores/Store';
 import { observer } from 'mobx-react-lite';
 import { SidebarListItem } from './SidebarListItem';
 import WalletButton from '../WalletButton';

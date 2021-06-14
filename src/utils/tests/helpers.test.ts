@@ -2,7 +2,7 @@ import * as helpers from '../helpers';
 import BigNumber from 'bignumber.js';
 import { NETWORK_LIST } from '../../config/constants/network';
 import { BSC_TOKENS, ETH_TOKENS } from '../../config/constants/tokens';
-import { ZeroStore } from '../../stores/ZeroStore';
+import { Store } from '../../stores/Store';
 
 const getMockFetch = (mockData: any) => {
 	return jest.fn().mockImplementation(() => {
@@ -195,7 +195,7 @@ describe('getTokens', () => {
 });
 
 // describe('getSushiToken', () => {
-// 	const zeroStore = new ZeroStore();
+// 	const Store = new Store();
 // 	const tokenMap = []
 // 	test.each([
 

@@ -3,7 +3,7 @@ import { Grid, Container, Paper } from '@material-ui/core';
 import { DRAWER_WIDTH } from '../../config/constants/ui';
 import { navHeight } from '../common/Navbar/Navbar';
 import { Theme, makeStyles } from '@material-ui/core/styles';
-import { StoreContext } from '../../stores/ZeroStore';
+import { StoreContext } from '../../stores/Store';
 import { observer } from 'mobx-react-lite';
 import { SUPPORTED_TOKEN_NAMES } from '../../config/constants/tokens';
 import SwapFrom from './SwapFrom';
@@ -68,7 +68,7 @@ export const Swap = observer(() => {
 	const classes = useStyles();
 	const store = useContext(StoreContext);
 	const {
-		wallet: { zero },
+		wallet: { zero, keepers },
 		currency: { loadPrices },
 		fees: { gasFee, getAllFees },
 	} = store;
@@ -205,6 +205,7 @@ export const Swap = observer(() => {
 				</Grid>
 			</Grid>
 			<StatsDisplay />
+			Current Keepers: {keepers ? Object.keys(keepers) : null}
 		</Container>
 	);
 });

@@ -2,7 +2,8 @@ import React, { useContext } from 'react';
 import { Button } from '@material-ui/core';
 import { makeStyles, Theme } from '@material-ui/core/styles';
 import { observer } from 'mobx-react-lite';
-import { StoreContext, ZeroStore } from '../../stores/ZeroStore';
+import { StoreContext, Store } from '../../stores/Store';
+import { connectWallet } from '../../utils/helpers';
 
 const useStyles = makeStyles((theme: Theme) => ({
 	root: {
@@ -38,17 +39,11 @@ const shortenAddress = (address: string) => {
 	return address.slice(0, 7) + '...' + address.slice(address.length - 7, address.length);
 };
 
-export const connect = async (store: ZeroStore) => {
-	const { onboard } = store.wallet;
+export const connect = async (store: Store) => {
+	const { onboard, connect } = store.wallet;
 	if (!onboard) return;
 	else {
-		const previouslySelectedWallet = window.localStorage.getItem('selectedWallet');
-		if (previouslySelectedWallet != null) await onboard.walletSelect(previouslySelectedWallet);
-		else if (!(await onboard?.walletSelect())) return;
-		const readyToTransact = await onboard.walletCheck();
-		if (readyToTransact) {
-			store.wallet.connect(onboard);
-		}
+		connectWallet(onboard, connect);
 	}
 };
 

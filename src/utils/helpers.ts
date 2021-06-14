@@ -1,12 +1,13 @@
 import type { PriceHistory, PriceSummary } from '../config/models/currency';
 import BigNumber from 'bignumber.js';
-import type { ZeroStore } from '../stores/ZeroStore';
+import type { Store } from '../stores/Store';
 import { BSC_TOKENS, ETH_TOKENS, SUPPORTED_TOKEN_NAMES, TokenDefinition } from '../config/constants/tokens';
 import { Route as SushiRoute, Fetcher, Pair, Route, Trade, TokenAmount, TradeType } from '@sushiswap/sdk';
 import { Token as SushiToken } from '@sushiswap/sdk';
 import { BaseProvider } from '@ethersproject/providers';
 import { NETWORK_LIST } from '../config/constants/network';
 import { TokenMap } from '../config/models/tokens';
+import { API } from 'bnc-onboard/dist/src/interfaces';
 
 // ============== BTC HELPERS ==============
 
@@ -90,7 +91,7 @@ export const getSushiToken = (
  * @return route from Sushiswap SDK
  */
 export const fetchRoute = async (
-	store: ZeroStore,
+	store: Store,
 	fromName: SUPPORTED_TOKEN_NAMES,
 	toName: SUPPORTED_TOKEN_NAMES,
 ): Promise<Route | undefined> => {
@@ -123,7 +124,7 @@ export const fetchRoute = async (
  * @return pair definition from the Sushiswap SDK
  */
 export const fetchPair = async (
-	store: ZeroStore,
+	store: Store,
 	fromName: SUPPORTED_TOKEN_NAMES,
 	toName: SUPPORTED_TOKEN_NAMES,
 ): Promise<Pair | void> => {
@@ -148,7 +149,7 @@ export const fetchPair = async (
  * @param store = store instance to get network specific data and sushi tokens
  * @return current market prices of tokens vs BTC on Sushiswap
  */
-export const fetchPrices = async (store: ZeroStore): Promise<PriceSummary | null> => {
+export const fetchPrices = async (store: Store): Promise<PriceSummary | null> => {
 	let prices = {};
 	if (!store.currency || !store.wallet) {
 		setTimeout(async () => {
@@ -184,7 +185,7 @@ export const fetchPrices = async (store: ZeroStore): Promise<PriceSummary | null
  * @return trade definition from the Sushiswap SDK
  */
 export const fetchTrade = async (
-	store: ZeroStore,
+	store: Store,
 	fromName: SUPPORTED_TOKEN_NAMES,
 	toName: SUPPORTED_TOKEN_NAMES,
 	amount: BigNumber,
@@ -220,14 +221,14 @@ export const fetchTrade = async (
 // ============== ZERO HELPERS ==============
 
 /* Calcualte the output of the Zero Swap after fees are applied
- * @param store = ZeroStore instance for network specifics
+ * @param store = Store instance for network specifics
  * @param amount = BigNumber execution price of the swap
  * @param decimals = amount of decimals to format the string to
  * @param noCommas = boolean to flag if the return should be comma formatted
  * @return string formatted estimation of value after fees
  */
 export const valueAfterFees = (
-	store: ZeroStore,
+	store: Store,
 	amount: BigNumber,
 	currency: SUPPORTED_TOKEN_NAMES,
 	decimals = 8,
@@ -291,5 +292,20 @@ export const coerceInputToNumber = (newValue: string, oldValue: string) => {
 		return oldValue;
 	} else {
 		return newValue;
+	}
+};
+
+/* Easy interface to check to see if wallet selection is handled and ready to connect
+ * via onboard.js.  To be reused if connect buttons are displayed in multiple components
+ * @param onboard = instance of the onboard.js API
+ * @param connect = connect function from the wallet store
+ */
+export const connectWallet = async (onboard: API, connect: (wsOnboard: any) => void): Promise<void> => {
+	const walletSelected = await onboard.walletSelect();
+	if (walletSelected && onboard.getState().network) {
+		const readyToTransact = await onboard.walletCheck();
+		if (readyToTransact) {
+			connect(onboard);
+		}
 	}
 };

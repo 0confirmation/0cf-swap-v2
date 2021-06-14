@@ -4,7 +4,7 @@ import { createStyles, Theme, makeStyles } from '@material-ui/core/styles';
 import { AppBar, Toolbar } from '@material-ui/core';
 import Header from './Header';
 import MobileHeader from './MobileHeader';
-import { StoreContext } from '../../../stores/ZeroStore';
+import { StoreContext } from '../../../stores/Store';
 import { observer } from 'mobx-react-lite';
 
 export const navHeight = 4;

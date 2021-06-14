@@ -2,7 +2,7 @@ import React, { useContext } from 'react';
 import { Button } from '@material-ui/core';
 import { Theme, makeStyles } from '@material-ui/core/styles';
 import { observer } from 'mobx-react-lite';
-import { StoreContext } from '../../stores/ZeroStore';
+import { StoreContext } from '../../stores/Store';
 import { connect } from '../common/WalletButton';
 import PaymentModal from './PaymentModal';
 import { PaymentModalProps } from '../swap/PaymentButton';

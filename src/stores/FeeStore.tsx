@@ -1,4 +1,4 @@
-import type { ZeroStore } from './ZeroStore';
+import type { Store } from './Store';
 import BigNumber from 'bignumber.js';
 import { NETWORK_LIST } from '../config/constants/network';
 import { action, extendObservable } from 'mobx';
@@ -6,14 +6,14 @@ import { FeeDescription, RenFees } from '../config/models/currency';
 import { SUPPORTED_TOKEN_NAMES } from '../config/constants/tokens';
 
 export default class FeeStore {
-	private readonly store!: ZeroStore;
+	private readonly store!: Store;
 	private gasInterval: NodeJS.Timeout | undefined;
 	public gasFee: FeeDescription;
 	public mintFee: FeeDescription;
 	public btcFee: FeeDescription;
 	public zeroFee: FeeDescription;
 
-	constructor(store: ZeroStore) {
+	constructor(store: Store) {
 		this.store = store;
 		this.gasFee = { value: undefined, scalar: undefined };
 		this.mintFee = { value: undefined, scalar: undefined };
@@ -91,7 +91,7 @@ export default class FeeStore {
 		}
 	});
 
-	getAllFees = (store: ZeroStore, amount: BigNumber, currency: SUPPORTED_TOKEN_NAMES): BigNumber | undefined => {
+	getAllFees = (store: Store, amount: BigNumber, currency: SUPPORTED_TOKEN_NAMES): BigNumber | undefined => {
 		const currencyPrice = store.currency.prices ? store.currency.prices[currency] : null;
 		if (!currencyPrice) return undefined;
 

@@ -1,7 +1,7 @@
 import Sidebar from './components/common/Sidebar/Sidebar';
 import Navbar from './components/common/Navbar/Navbar';
 import { Container, CssBaseline, ThemeProvider } from '@material-ui/core';
-import store, { StoreProvider } from './stores/ZeroStore';
+import store, { StoreProvider } from './stores/Store';
 import { MobxRouter, startRouter } from 'mobx-router';
 import routes from './config/routes';
 import { Snackbar } from './components/common/Snackbar';

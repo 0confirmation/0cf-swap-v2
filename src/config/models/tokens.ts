@@ -1,6 +1,6 @@
 import BigNumber from 'bignumber.js';
 import { action, extendObservable } from 'mobx';
-import type { ZeroStore } from '../../stores/ZeroStore';
+import type { Store } from '../../stores/Store';
 import { numberWithCommas } from '../../utils/helpers';
 
 export interface TokenMap {
@@ -8,14 +8,14 @@ export interface TokenMap {
 }
 
 export class Token {
-	private store!: ZeroStore;
+	private store!: Store;
 	public name: string;
 	public symbol: string;
 	public address: string;
 	public decimals: number;
 	public price: BigNumber;
 
-	constructor(store: ZeroStore, address: string, name: string, symbol: string, decimals: number, price?: BigNumber) {
+	constructor(store: Store, address: string, name: string, symbol: string, decimals: number, price?: BigNumber) {
 		this.store = store;
 		this.name = name;
 		this.symbol = symbol;

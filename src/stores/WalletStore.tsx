@@ -1,26 +1,28 @@
 import type { API, Wallet } from 'bnc-onboard/dist/src/interfaces';
 import type { API as NotifyAPI } from 'bnc-notify';
-import type { ZeroStore } from './ZeroStore';
+import type { Store } from './Store';
 import Onboard from 'bnc-onboard';
 import Notify from 'bnc-notify';
 import { notifyOptions, onboardWalletCheck, getOnboardWallets } from '../config/wallets';
-import { action, extendObservable } from 'mobx';
-import { getNetwork } from '../utils/network';
+import { action, extendObservable, runInAction } from 'mobx';
+import { getNetwork, getNetworkNameFromId } from '../utils/network';
 import type { Network } from '../config/models/network';
+import type { KeeperList } from '../config/models/zero';
 import { ethers } from 'ethers';
 import type Zero from '@0confirmation/sdk';
 
 export default class WalletStore {
-	private store: ZeroStore;
+	private store: Store;
 	public onboard: API;
 	public connectedAddress: string = '';
 	public network: Network;
 	public notify: NotifyAPI;
 	public currentBlock?: number;
 	public zero: typeof Zero | undefined;
+	public keepers: KeeperList | undefined;
 	public provider: ethers.providers.Web3Provider | undefined;
 
-	constructor(store: ZeroStore) {
+	constructor(store: Store) {
 		this.network = getNetwork();
 		this.store = store;
 		this.notify = Notify(notifyOptions);
@@ -31,7 +33,7 @@ export default class WalletStore {
 			networkId: this.network.networkId,
 			subscriptions: {
 				address: (address: string) => {
-					this.connectedAddress = address;
+					this.setAddress(address);
 				},
 				wallet: (wallet: Wallet) => {
 					if (wallet.name) window.localStorage.setItem('selectedWallet', wallet.name);
@@ -54,6 +56,7 @@ export default class WalletStore {
 			zero: undefined,
 			gasFee: undefined,
 			provider: undefined,
+			keepers: undefined,
 		});
 
 		this.init();
@@ -61,9 +64,33 @@ export default class WalletStore {
 
 	init = action(async () => {
 		const previouslySelectedWallet = window.localStorage.getItem('selectedWallet');
-		if (previouslySelectedWallet != null) {
-			await this.onboard.walletSelect(previouslySelectedWallet);
-			this.connect(this.onboard);
+		if (!!previouslySelectedWallet) {
+			const walletSelected = await this.onboard.walletSelect(previouslySelectedWallet);
+			let walletReady = false;
+			try {
+				walletReady = await this.onboard.walletCheck();
+			} catch (err) {
+				this.onboard.walletReset();
+				return;
+			}
+			if (walletSelected && walletReady) {
+				this.connect(this.onboard);
+			} else {
+				this.walletReset();
+			}
+		}
+	});
+
+	setAddress = action(async (address: string): Promise<void> => {
+		if (await this.checkSupportedNetwork()) {
+			runInAction(() => {
+				this.connectedAddress = address;
+			});
+			await this.store.storeRefresh();
+		} else {
+			runInAction(() => {
+				this.connectedAddress = '';
+			});
 		}
 	});
 
@@ -73,21 +100,40 @@ export default class WalletStore {
 
 	connect = action((wsOnboard: API) => {
 		const walletState = wsOnboard.getState();
-		console.log('state:', walletState);
-		this.connectedAddress = walletState.address;
-		this.onboard = wsOnboard;
-		this.provider = new ethers.providers.Web3Provider(walletState.wallet.provider);
-		this._setZero(this.provider);
-		Promise.all([this.store.storeRefresh()]);
+		const provider = new ethers.providers.Web3Provider(walletState.wallet.provider);
+		if (this.checkSupportedNetwork(provider)) {
+			this.onboard = wsOnboard;
+			this.provider = provider;
+			this.setAddress(walletState.address);
+			this._setZero(this.provider);
+			Promise.all([this.store.storeRefresh()]);
+		} else {
+			this.walletReset();
+		}
 	});
 
 	disconnect = action(() => {
-		this.connectedAddress = '';
+		this.setAddress('');
 		this.store.fees.clearFees();
 		this.zero = undefined;
 		this.onboard.walletReset();
 		this.provider = undefined;
 		if (this.isCached()) window.localStorage.removeItem('selectedWallet');
+	});
+
+	walletReset = action((): void => {
+		try {
+			this.onboard.walletReset();
+			this.provider = undefined;
+			this.setAddress('');
+			window.localStorage.removeItem('selectedWallet');
+		} catch (err) {
+			console.log(err);
+		}
+	});
+
+	private setKeepers = action((keeperList: KeeperList): void => {
+		this.keepers = keeperList;
 	});
 
 	/* Utilizes the user's provider to connect to the
@@ -97,5 +143,32 @@ export default class WalletStore {
 		const Zero = require('@0confirmation/sdk');
 		this.zero = new Zero(provider, 'mainnet');
 		await this.zero.initializeDriver();
+		const emitter = this.zero.createKeeperEmitter();
+		emitter.poll();
+		emitter.on('keeper', (address: string) => {
+			console.log('keeper', address);
+			this.setKeepers({
+				[address]: true,
+				...this.keepers,
+			});
+		});
+		setInterval(() => {
+			this.setKeepers({});
+			emitter.poll();
+		}, 120e3);
 	});
+
+	/* Network should be checked based on the provider.  You can either provide a provider
+	 * if the current one is not set or it's a new one, or use the current set provider by
+	 * not passing in a value.
+	 */
+	checkSupportedNetwork = async (provider?: ethers.providers.Web3Provider): Promise<boolean> => {
+		const currentNetwork = provider ? await provider.getNetwork() : await this.provider?.getNetwork();
+		const chainId = currentNetwork?.chainId ?? null;
+		if (chainId) {
+			const name = getNetworkNameFromId(chainId);
+			return !!name;
+		}
+		return false;
+	};
 }

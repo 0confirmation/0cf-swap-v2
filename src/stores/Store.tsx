@@ -5,15 +5,15 @@ import UiStore from './UiStore';
 import CurrencyStore from './CurrencyStore';
 import FeeStore from './FeeStore';
 
-export class ZeroStore {
-	public router: RouterStore<ZeroStore>;
+export class Store {
+	public router: RouterStore<Store>;
 	public wallet: WalletStore;
 	public ui: UiStore;
 	public currency: CurrencyStore;
 	public fees: FeeStore;
 
 	constructor() {
-		this.router = new RouterStore<ZeroStore>(this);
+		this.router = new RouterStore<Store>(this);
 		this.wallet = new WalletStore(this);
 		this.ui = new UiStore(this);
 		this.currency = new CurrencyStore(this);
@@ -36,9 +36,9 @@ export class ZeroStore {
 	}
 }
 
-const store = new ZeroStore();
+const store = new Store();
 
-export const StoreContext = createContext({} as ZeroStore);
+export const StoreContext = createContext({} as Store);
 export const StoreProvider = StoreContext.Provider;
 
 export default store;
