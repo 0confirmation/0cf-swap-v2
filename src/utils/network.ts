@@ -1,5 +1,6 @@
 import { NETWORK_IDS, NETWORK_LIST } from '../config/constants/network';
 import { BscNetwork, EthNetwork, Network } from '../config/models/network';
+import { ethers } from 'ethers';
 
 export const getNetwork = (network?: string): Network => {
 	switch (network) {
@@ -21,13 +22,21 @@ export const getNetworkId = (network: string): number | undefined => {
 	}
 };
 
-export const getNetworkNameFromId = (network: number): string | undefined => {
+export const getNetworkNameFromId = (network: number): string | null => {
 	switch (network) {
 		case NETWORK_IDS.BSC:
 			return NETWORK_LIST.BSC;
 		case NETWORK_IDS.ETH:
 			return NETWORK_LIST.ETH;
 		default:
-			return undefined;
+			return null;
 	}
+};
+
+export const getNetworkFromProvider = async (
+	provider: ethers.providers.Web3Provider | undefined,
+): Promise<string | null> => {
+	if (!provider) return null;
+	const network = provider._network;
+	return provider ? getNetworkNameFromId(network.chainId) : null;
 };

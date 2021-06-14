@@ -53,6 +53,7 @@ export default class WalletStore {
 			currentBlock: undefined,
 			zero: undefined,
 			gasFee: undefined,
+			provider: undefined,
 		});
 
 		this.init();
@@ -62,6 +63,7 @@ export default class WalletStore {
 		const previouslySelectedWallet = window.localStorage.getItem('selectedWallet');
 		if (previouslySelectedWallet != null) {
 			await this.onboard.walletSelect(previouslySelectedWallet);
+			this.connect(this.onboard);
 		}
 	});
 
@@ -71,13 +73,12 @@ export default class WalletStore {
 
 	connect = action((wsOnboard: API) => {
 		const walletState = wsOnboard.getState();
+		console.log('state:', walletState);
 		this.connectedAddress = walletState.address;
 		this.onboard = wsOnboard;
 		this.provider = new ethers.providers.Web3Provider(walletState.wallet.provider);
 		this._setZero(this.provider);
-		this.store.currency.loadPrices().then(() => {
-			this.store.fees.setFees();
-		});
+		Promise.all([this.store.storeRefresh()]);
 	});
 
 	disconnect = action(() => {

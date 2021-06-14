@@ -6,6 +6,7 @@ import { Route as SushiRoute, Fetcher, Pair, Route, Trade, TokenAmount, TradeTyp
 import { Token as SushiToken } from '@sushiswap/sdk';
 import { BaseProvider } from '@ethersproject/providers';
 import { NETWORK_LIST } from '../config/constants/network';
+import { TokenMap } from '../config/models/tokens';
 
 // ============== BTC HELPERS ==============
 
@@ -66,13 +67,13 @@ export const getTokens = (network?: NETWORK_LIST): TokenDefinition[] => {
 /* Returns a Sushiswap formatted token based on a token definition name
  * @param token = Token name on the supported token list
  */
-export const getSushiToken = (tokenName: string, store: ZeroStore): SushiToken | undefined => {
-	if (!store.currency) return undefined;
-	const { tokenMap } = store.currency;
+export const getSushiToken = (
+	tokenName: string,
+	tokenMap: TokenMap | null | undefined,
+	networkId: number,
+): SushiToken | undefined => {
 	const token = tokenMap ? tokenMap[tokenName] : null;
-	return token
-		? new SushiToken(store.wallet.network.networkId, token.address, token.decimals, token.symbol, token.name)
-		: undefined;
+	return token ? new SushiToken(networkId, token.address, token.decimals, token.symbol, token.name) : undefined;
 };
 
 /* Get the pair data to create routes and return the sushiswap route data
@@ -87,8 +88,15 @@ export const fetchRoute = async (
 	fromName: SUPPORTED_TOKEN_NAMES,
 	toName: SUPPORTED_TOKEN_NAMES,
 ): Promise<Route | undefined> => {
-	const currencyToken = getSushiToken(fromName, store);
-	if (!currencyToken || !store.wallet.connectedAddress) return undefined;
+	const {
+		currency: { tokenMap },
+		wallet: {
+			connectedAddress,
+			network: { networkId },
+		},
+	} = store;
+	const currencyToken = getSushiToken(fromName, tokenMap, networkId);
+	if (!currencyToken || !connectedAddress) return undefined;
 
 	// If we're going from token -> eth, we only need one pair
 	if (toName === SUPPORTED_TOKEN_NAMES.ETH) {
@@ -112,11 +120,20 @@ export const fetchPair = async (
 	fromName: SUPPORTED_TOKEN_NAMES,
 	toName: SUPPORTED_TOKEN_NAMES,
 ): Promise<Pair | void> => {
-	const fromToken = getSushiToken(fromName, store);
-	const toToken = getSushiToken(toName, store);
-	if (!fromToken || !toToken || !store.wallet.connectedAddress) return undefined;
+	const {
+		currency: { tokenMap },
+		wallet: {
+			connectedAddress,
+			provider,
+			network: { networkId },
+		},
+	} = store;
 
-	return Fetcher.fetchPairData(fromToken, toToken, store.wallet.provider as BaseProvider);
+	const fromToken = getSushiToken(fromName, tokenMap, networkId);
+	const toToken = getSushiToken(toName, tokenMap, networkId);
+	if (!fromToken || !toToken || !connectedAddress) return undefined;
+
+	return Fetcher.fetchPairData(fromToken, toToken, provider as BaseProvider);
 };
 
 /* Fetches the pair data from sushiswap and calculates current pricing for all supported pairs
@@ -125,8 +142,20 @@ export const fetchPair = async (
  */
 export const fetchPrices = async (store: ZeroStore): Promise<PriceSummary | null> => {
 	let prices = {};
+	if (!store.currency || !store.wallet) {
+		setTimeout(async () => {
+			store.storeRefresh();
+		}, 1000);
+		return null;
+	}
+	const {
+		currency: { tokenMap },
+		wallet: {
+			network: { networkId },
+		},
+	} = store;
 
-	const btc = getSushiToken(SUPPORTED_TOKEN_NAMES.WBTC, store);
+	const btc = getSushiToken(SUPPORTED_TOKEN_NAMES.WBTC, tokenMap, networkId);
 	if (!btc) return null;
 
 	for (const token in SUPPORTED_TOKEN_NAMES) {
@@ -152,7 +181,17 @@ export const fetchTrade = async (
 	amount: BigNumber,
 	type: TradeType,
 ): Promise<Trade | undefined> => {
-	const inputToken = type === TradeType.EXACT_INPUT ? getSushiToken(fromName, store) : getSushiToken(toName, store);
+	const {
+		currency: { tokenMap },
+		wallet: {
+			network: { networkId },
+		},
+	} = store;
+
+	const inputToken =
+		type === TradeType.EXACT_INPUT
+			? getSushiToken(fromName, tokenMap, networkId)
+			: getSushiToken(toName, tokenMap, networkId);
 	const route = await fetchRoute(store, fromName, toName);
 	if (!inputToken || !route) return undefined;
 	const trade = new Trade(

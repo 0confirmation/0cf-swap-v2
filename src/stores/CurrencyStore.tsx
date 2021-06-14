@@ -42,7 +42,7 @@ export default class CurrencyStore {
 			return new Token(this.store, token.address, token.name, token.symbol, token.decimals);
 		});
 		this.tokenMapCache = Object.assign({}, ...this.tokens.map((token) => ({ [token.name]: token })));
-
+		// console.log('tokens:', this.tokens, this.tokenMapCache);
 		this.init();
 	}
 
@@ -82,7 +82,13 @@ export default class CurrencyStore {
 
 	loadPrices = action(async (): Promise<void> => {
 		this.setPrices(await fetchPrices(this.store));
-		if (!this.prices) return;
+		if (!this.prices) {
+			setTimeout(async () => {
+				console.log('retrying load prices');
+				await this.init();
+			}, 5000);
+			return;
+		}
 
 		const newTokenMap = this.tokenMapCache;
 

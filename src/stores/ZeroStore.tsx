@@ -19,6 +19,21 @@ export class ZeroStore {
 		this.currency = new CurrencyStore(this);
 		this.fees = new FeeStore(this);
 	}
+
+	async storeRefresh(): Promise<void> {
+		if (!this.wallet.connectedAddress) return;
+		const chain = await this.wallet.provider?.getNetwork();
+
+		if (chain) {
+			const refreshData = [
+				this.currency.loadPrices(),
+				this.currency.loadBtcBlockTime(),
+				this.currency.loadBtcBlockHeight(),
+				this.fees.setFees(),
+			];
+			await Promise.all(refreshData);
+		}
+	}
 }
 
 const store = new ZeroStore();
