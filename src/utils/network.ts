@@ -1,8 +1,11 @@
 import { NETWORK_IDS, NETWORK_LIST } from '../config/constants/network';
 import { BscNetwork, EthNetwork, Network } from '../config/models/network';
-import { ethers } from 'ethers';
 
-export const getNetwork = (network?: string): Network => {
+/* Return a network class based on the provided network name
+ * @param newtork = NETWORK_LIST enum of the class you'd like to receive
+ * @return instanciated class of the network, default ETH
+ */
+export const getNetwork = (network?: NETWORK_LIST): Network => {
 	switch (network) {
 		case NETWORK_LIST.BSC:
 			return new BscNetwork();
@@ -11,18 +14,26 @@ export const getNetwork = (network?: string): Network => {
 	}
 };
 
-export const getNetworkId = (network: string): number | undefined => {
+/* Return the ID of the provided network enum
+ * @param network = NETWORK_LIST enum of the ID you'd like to receive
+ * @return int formatted network ID
+ */
+export const getNetworkId = (network: NETWORK_LIST): number | undefined => {
 	switch (network) {
 		case NETWORK_LIST.BSC:
-			return 56;
+			return NETWORK_IDS.BSC;
 		case NETWORK_LIST.ETH:
-			return 1;
+			return NETWORK_IDS.ETH;
 		default:
 			return undefined;
 	}
 };
 
-export const getNetworkNameFromId = (network: number): string | null => {
+/* Return the NETWORK_LIST enum value of the provided network number
+ * @param network = NETWORK_IDS enum of the name you'd like to receive
+ * @return NETWORK_LIST formatted network ID
+ */
+export const getNetworkNameFromId = (network: NETWORK_IDS): string | null => {
 	switch (network) {
 		case NETWORK_IDS.BSC:
 			return NETWORK_LIST.BSC;
@@ -31,12 +42,4 @@ export const getNetworkNameFromId = (network: number): string | null => {
 		default:
 			return null;
 	}
-};
-
-export const getNetworkFromProvider = async (
-	provider: ethers.providers.Web3Provider | undefined,
-): Promise<string | null> => {
-	if (!provider) return null;
-	const network = provider._network;
-	return provider ? getNetworkNameFromId(network.chainId) : null;
 };

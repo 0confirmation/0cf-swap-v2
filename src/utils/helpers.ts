@@ -12,6 +12,7 @@ import { TokenMap } from '../config/models/tokens';
 
 /* Returns the most recent price and the price that is as close to 6 confirmations away from current price
  * @param confirmationTime = time in minutes that it takes for 6 confirmation
+ * @return Current price and the price from now - confirmationTime
  */
 export const fetchBtcPriceHistory = async (confirmationTime: string): Promise<PriceHistory | undefined> => {
 	const numConfTime = parseFloat(confirmationTime);
@@ -33,6 +34,7 @@ export const fetchBtcPriceHistory = async (confirmationTime: string): Promise<Pr
 };
 
 /* Returns the most recent block height of the longest chain on the BTC blockchain.
+ * @return current block height of BTC
  */
 export const fetchBtcBlockHeight = async (): Promise<number | undefined> => {
 	const response: number | null | undefined = await fetchData(() => fetch('https://blockchain.info/q/getblockcount'));
@@ -40,6 +42,7 @@ export const fetchBtcBlockHeight = async (): Promise<number | undefined> => {
 };
 
 /* Pulls the average block length in minutes and returns the time it takes for 6 confirmations on average
+ * @return BTC confirmation time * 6 (globally accepted confirmation length for "finality")
  */
 export const fetchBtcConfirmationTime = async (): Promise<string> => {
 	const stats: { [key: string]: string } | null = await fetchData(() =>
@@ -54,6 +57,7 @@ export const fetchBtcConfirmationTime = async (): Promise<string> => {
 
 /* Returns a list of token definitions based on the input network
  * @param network (optional) = Name of network to return tokens for, default Ethereum
+ * @return token definitions for the provided network, default ETH
  */
 export const getTokens = (network?: NETWORK_LIST): TokenDefinition[] => {
 	switch (network) {
@@ -66,6 +70,7 @@ export const getTokens = (network?: NETWORK_LIST): TokenDefinition[] => {
 
 /* Returns a Sushiswap formatted token based on a token definition name
  * @param token = Token name on the supported token list
+ * @return Token format to match Sushiswap SDK
  */
 export const getSushiToken = (
 	tokenName: string,
@@ -82,6 +87,7 @@ export const getSushiToken = (
  * @param fromName = Name of tokenA in the supported token list
  * @param toName = Name of tokenB in the supported token list
  * @param currency = token name we're denominating the trade in
+ * @return route from Sushiswap SDK
  */
 export const fetchRoute = async (
 	store: ZeroStore,
@@ -114,6 +120,7 @@ export const fetchRoute = async (
  * @param store = Store data to pull network specific information
  * @param fromName = Name of tokenA in the supported token list
  * @param toName = Name of tokenB in the supported token list
+ * @return pair definition from the Sushiswap SDK
  */
 export const fetchPair = async (
 	store: ZeroStore,
@@ -139,6 +146,7 @@ export const fetchPair = async (
 /* Fetches the pair data from sushiswap and calculates current pricing for all supported pairs
  * NOTE: this pricing is not execution price and should only be used for displaying current price.
  * @param store = store instance to get network specific data and sushi tokens
+ * @return current market prices of tokens vs BTC on Sushiswap
  */
 export const fetchPrices = async (store: ZeroStore): Promise<PriceSummary | null> => {
 	let prices = {};
@@ -173,6 +181,7 @@ export const fetchPrices = async (store: ZeroStore): Promise<PriceSummary | null
  * @param fromName = name of token we're swapping from
  * @param tokenName = name of token we're swapping to
  * @param amount = BigNumber amount we're swapping from in from token
+ * @return trade definition from the Sushiswap SDK
  */
 export const fetchTrade = async (
 	store: ZeroStore,
@@ -210,11 +219,12 @@ export const fetchTrade = async (
 
 // ============== ZERO HELPERS ==============
 
-/* Returns a string formatted estimation of the value you'd receive after fees
+/* Calcualte the output of the Zero Swap after fees are applied
  * @param store = ZeroStore instance for network specifics
  * @param amount = BigNumber execution price of the swap
  * @param decimals = amount of decimals to format the string to
  * @param noCommas = boolean to flag if the return should be comma formatted
+ * @return string formatted estimation of value after fees
  */
 export const valueAfterFees = (
 	store: ZeroStore,
@@ -233,6 +243,7 @@ export const valueAfterFees = (
 
 /* General purpose fetch that returns a JSON formatted response or null if there's an error
  * @param request = Promise to await
+ * @return JSON formatted response
  */
 export const fetchData = async <T>(request: () => Promise<Response>): Promise<T | null> => {
 	try {
@@ -252,6 +263,7 @@ export const fetchData = async <T>(request: () => Promise<Response>): Promise<T 
 
 /* Breaks down a provided number and inserts appropriately placed commas to make a number more human readable
  * @param x = string formatted number to modify with commas
+ * @return comma formatted number as a string
  */
 export const numberWithCommas = (x: string): string => {
 	const parts = x.split('.');
@@ -263,6 +275,7 @@ export const numberWithCommas = (x: string): string => {
  * a BigNumber.  If it's not a valid input, returns the old value.
  * @param newValue = String input from an onChange event
  * @param oldValue = Previous value to revert to if an invalid input
+ * @return string formatted number
  */
 export const coerceInputToNumber = (newValue: string, oldValue: string) => {
 	// Format to add a leading zero in front of decimals
