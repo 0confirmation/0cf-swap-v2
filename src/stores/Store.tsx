@@ -4,6 +4,7 @@ import WalletStore from './WalletStore';
 import UiStore from './UiStore';
 import CurrencyStore from './CurrencyStore';
 import FeeStore from './FeeStore';
+import ZeroStore from './ZeroStore';
 
 export class Store {
 	public router: RouterStore<Store>;
@@ -11,6 +12,7 @@ export class Store {
 	public ui: UiStore;
 	public currency: CurrencyStore;
 	public fees: FeeStore;
+	public zero: ZeroStore;
 
 	constructor() {
 		this.router = new RouterStore<Store>(this);
@@ -18,6 +20,7 @@ export class Store {
 		this.ui = new UiStore(this);
 		this.currency = new CurrencyStore(this);
 		this.fees = new FeeStore(this);
+		this.zero = new ZeroStore(this);
 	}
 
 	async storeRefresh(): Promise<void> {

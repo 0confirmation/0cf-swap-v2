@@ -6,6 +6,7 @@ import { StoreContext } from '../../stores/Store';
 import { connect } from '../common/WalletButton';
 import PaymentModal from './PaymentModal';
 import { PaymentModalProps } from '../swap/PaymentButton';
+import { BUTTON_STATUS } from '../../config/constants/ui';
 
 const useStyles = makeStyles((theme: Theme) => ({
 	submitButton: {
@@ -23,7 +24,10 @@ const useStyles = makeStyles((theme: Theme) => ({
 
 export const BitcoinPayment = observer((props: PaymentModalProps): JSX.Element => {
 	const store = useContext(StoreContext);
-	const { connectedAddress } = store.wallet;
+	const {
+		wallet: { connectedAddress },
+		zero: { keepers },
+	} = store;
 	const classes = useStyles();
 	const [open, setOpen] = React.useState(false);
 
@@ -39,18 +43,29 @@ export const BitcoinPayment = observer((props: PaymentModalProps): JSX.Element =
 		setOpen(false);
 	};
 
-	const isActive = (): boolean => {
-		return !!connectedAddress;
+	const buttonStatus = (): BUTTON_STATUS => {
+		console.log('check', connectedAddress, !!keepers, keepers ? Object.keys(keepers).length : undefined);
+		if (!!connectedAddress && !!keepers && Object.keys(keepers).length > 0) return BUTTON_STATUS.keeperConnected;
+		else if (!!connectedAddress && (!keepers || Object.keys(keepers).length <= 0)) return BUTTON_STATUS.noKeeper;
+		else return BUTTON_STATUS.disconnected;
+	};
+
+	const buttonFunction = () => {
+		const status = buttonStatus();
+		switch (status) {
+			case BUTTON_STATUS.disconnected:
+				return handleConnect();
+			case BUTTON_STATUS.keeperConnected:
+				return handleOpen();
+			default:
+				return null;
+		}
 	};
 
 	return (
 		<>
-			<Button
-				className={classes.submitButton}
-				onClick={!isActive() ? handleConnect : handleOpen}
-				variant="contained"
-			>
-				{!isActive() ? 'Connect Wallet' : 'Review Order'}
+			<Button className={classes.submitButton} onClick={buttonFunction} variant="contained">
+				{buttonStatus()}
 			</Button>
 			<PaymentModal open={open} handleClose={handleClose} {...props} />
 		</>

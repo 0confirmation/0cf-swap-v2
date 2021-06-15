@@ -7,9 +7,7 @@ import { notifyOptions, onboardWalletCheck, getOnboardWallets } from '../config/
 import { action, extendObservable, runInAction } from 'mobx';
 import { getNetwork, getNetworkNameFromId } from '../utils/network';
 import type { Network } from '../config/models/network';
-import type { KeeperList } from '../config/models/zero';
 import { ethers } from 'ethers';
-import type Zero from '@0confirmation/sdk';
 
 export default class WalletStore {
 	private store: Store;
@@ -18,8 +16,6 @@ export default class WalletStore {
 	public network: Network;
 	public notify: NotifyAPI;
 	public currentBlock?: number;
-	public zero: typeof Zero | undefined;
-	public keepers: KeeperList | undefined;
 	public provider: ethers.providers.Web3Provider | undefined;
 
 	constructor(store: Store) {
@@ -53,10 +49,8 @@ export default class WalletStore {
 			network: this.network,
 			onboard: this.onboard,
 			currentBlock: undefined,
-			zero: undefined,
 			gasFee: undefined,
 			provider: undefined,
-			keepers: undefined,
 		});
 
 		this.init();
@@ -105,7 +99,7 @@ export default class WalletStore {
 			this.onboard = wsOnboard;
 			this.provider = provider;
 			this.setAddress(walletState.address);
-			this._setZero(this.provider);
+			this.store.zero.setZero(this.provider);
 			Promise.all([this.store.storeRefresh()]);
 		} else {
 			this.walletReset();
@@ -115,7 +109,7 @@ export default class WalletStore {
 	disconnect = action(() => {
 		this.setAddress('');
 		this.store.fees.clearFees();
-		this.zero = undefined;
+		this.store.zero.setZero(undefined);
 		this.onboard.walletReset();
 		this.provider = undefined;
 		if (this.isCached()) window.localStorage.removeItem('selectedWallet');
@@ -130,32 +124,6 @@ export default class WalletStore {
 		} catch (err) {
 			console.log(err);
 		}
-	});
-
-	private setKeepers = action((keeperList: KeeperList): void => {
-		this.keepers = keeperList;
-	});
-
-	/* Utilizes the user's provider to connect to the
-	 * Zero network.
-	 */
-	private _setZero = action(async (provider: any) => {
-		const Zero = require('@0confirmation/sdk');
-		this.zero = new Zero(provider, 'mainnet');
-		await this.zero.initializeDriver();
-		const emitter = this.zero.createKeeperEmitter();
-		emitter.poll();
-		emitter.on('keeper', (address: string) => {
-			console.log('keeper', address);
-			this.setKeepers({
-				[address]: true,
-				...this.keepers,
-			});
-		});
-		setInterval(() => {
-			this.setKeepers({});
-			emitter.poll();
-		}, 120e3);
 	});
 
 	/* Network should be checked based on the provider.  You can either provide a provider

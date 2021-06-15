@@ -68,7 +68,7 @@ export const Swap = observer(() => {
 	const classes = useStyles();
 	const store = useContext(StoreContext);
 	const {
-		wallet: { zero, keepers },
+		zero: { zero },
 		currency: { loadPrices },
 		fees: { gasFee, getAllFees },
 	} = store;
@@ -205,7 +205,6 @@ export const Swap = observer(() => {
 				</Grid>
 			</Grid>
 			<StatsDisplay />
-			Current Keepers: {keepers ? Object.keys(keepers) : null}
 		</Container>
 	);
 });
