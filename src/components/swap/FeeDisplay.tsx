@@ -41,6 +41,7 @@ export const FeeDisplay = observer((props: SwapToProps): JSX.Element | null => {
 		wallet: { connectedAddress },
 		currency: { toToken },
 		fees: { gasFee, mintFee, btcFee, zeroFee },
+		zero: { keepers },
 	} = store;
 	const { selectedCoin, amount, priceImpact } = props;
 
@@ -68,6 +69,11 @@ export const FeeDisplay = observer((props: SwapToProps): JSX.Element | null => {
 	};
 
 	const feeInfo: FeeRowProps[] = [
+		{
+			title: 'Keepers Connected',
+			description: `${keepers ? Object.keys(keepers).length : 0}`,
+			collapsable: false,
+		},
 		{
 			title: 'Rate',
 			description: `1 BTC = ${toToken(new BigNumber(1), selectedCoin, SUPPORTED_TOKEN_NAMES.WBTC, 2)}${' '} ${
