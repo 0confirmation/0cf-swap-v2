@@ -18,7 +18,7 @@ export const getNetwork = (network?: NETWORK_LIST): Network => {
  * @param network = NETWORK_LIST enum of the ID you'd like to receive
  * @return int formatted network ID
  */
-export const getNetworkId = (network: NETWORK_LIST): number | undefined => {
+export const getNetworkId = (network: NETWORK_LIST | undefined): number | undefined => {
 	switch (network) {
 		case NETWORK_LIST.BSC:
 			return NETWORK_IDS.BSC;
