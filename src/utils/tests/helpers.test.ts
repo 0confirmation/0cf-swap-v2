@@ -2,7 +2,6 @@ import * as helpers from '../helpers';
 import BigNumber from 'bignumber.js';
 import { NETWORK_LIST } from '../../config/constants/network';
 import { BSC_TOKENS, ETH_TOKENS } from '../../config/constants/tokens';
-import { Store } from '../../stores/Store';
 
 const getMockFetch = (mockData: any) => {
 	return jest.fn().mockImplementation(() => {

@@ -1,7 +1,13 @@
 import type { PriceHistory, PriceSummary } from '../config/models/currency';
 import BigNumber from 'bignumber.js';
 import type { Store } from '../stores/Store';
-import { BSC_TOKENS, ETH_TOKENS, SUPPORTED_TOKEN_NAMES, TokenDefinition } from '../config/constants/tokens';
+import {
+	BSC_TOKENS,
+	ETH_TOKENS,
+	MATIC_TOKENS,
+	SUPPORTED_TOKEN_NAMES,
+	TokenDefinition,
+} from '../config/constants/tokens';
 import { Route as SushiRoute, Fetcher, Pair, Route, Trade, TokenAmount, TradeType } from '@sushiswap/sdk';
 import { Token as SushiToken } from '@sushiswap/sdk';
 import { BaseProvider } from '@ethersproject/providers';
@@ -64,6 +70,8 @@ export const getTokens = (network?: NETWORK_LIST): TokenDefinition[] => {
 	switch (network) {
 		case NETWORK_LIST.BSC:
 			return BSC_TOKENS;
+		case NETWORK_LIST.MATIC:
+			return MATIC_TOKENS;
 		default:
 			return ETH_TOKENS;
 	}
@@ -102,7 +110,9 @@ export const fetchRoute = async (
 			network: { networkId },
 		},
 	} = store;
+
 	const currencyToken = getSushiToken(fromName, tokenMap, networkId);
+
 	if (!currencyToken || !connectedAddress) return undefined;
 
 	// If we're going from token -> eth, we only need one pair
@@ -130,15 +140,12 @@ export const fetchPair = async (
 ): Promise<Pair | void> => {
 	const {
 		currency: { tokenMap },
-		wallet: {
-			connectedAddress,
-			provider,
-			network: { networkId },
-		},
+		wallet: { connectedAddress, provider, network },
 	} = store;
 
-	const fromToken = getSushiToken(fromName, tokenMap, networkId);
-	const toToken = getSushiToken(toName, tokenMap, networkId);
+	const fromToken = getSushiToken(fromName, tokenMap, network.networkId);
+	const toToken = getSushiToken(toName, tokenMap, network.networkId);
+
 	if (!fromToken || !toToken || !connectedAddress) return undefined;
 
 	return Fetcher.fetchPairData(fromToken, toToken, provider as BaseProvider);
@@ -202,6 +209,7 @@ export const fetchTrade = async (
 		type === TradeType.EXACT_INPUT
 			? getSushiToken(fromName, tokenMap, networkId)
 			: getSushiToken(toName, tokenMap, networkId);
+
 	const route = await fetchRoute(store, fromName, toName);
 	if (!inputToken || !route) return undefined;
 	const trade = new Trade(
@@ -308,4 +316,11 @@ export const connectWallet = async (onboard: API, connect: (wsOnboard: any) => v
 			connect(onboard);
 		}
 	}
+};
+
+/* Clear intervals
+ * @param interval = Interval set in code that you'd like to cancel
+ */
+export const cancelInterval = (interval: NodeJS.Timeout | undefined): void => {
+	if (interval) clearInterval(interval);
 };

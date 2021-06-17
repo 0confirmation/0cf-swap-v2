@@ -1,7 +1,15 @@
 import { NETWORK_LIST, NETWORK_IDS } from '../constants/network';
 import { TokenDefinition } from '../constants/tokens';
 import { getTokens } from '../../utils/helpers';
-import RenJS from '@renproject/ren';
+import {
+	EthereumClass,
+	PolygonClass,
+	BinanceSmartChainClass,
+	Ethereum,
+	Polygon,
+	BinanceSmartChain,
+} from '@renproject/chains';
+import { CallableConstructor } from '@renproject/utils';
 
 export type NetworkConstants = {
 	[index: string]: {
@@ -19,7 +27,10 @@ export interface Network {
 	networkId: number;
 	fullName: string;
 	tokens: TokenDefinition[];
-	renJS: RenJS;
+	renNetwork:
+		| CallableConstructor<typeof EthereumClass>
+		| CallableConstructor<typeof PolygonClass>
+		| CallableConstructor<typeof BinanceSmartChainClass>;
 }
 
 export class EthNetwork implements Network {
@@ -27,7 +38,7 @@ export class EthNetwork implements Network {
 	readonly networkId = NETWORK_IDS.ETH;
 	readonly fullName = 'Ethereum';
 	public tokens = getTokens(NETWORK_LIST.ETH);
-	public renJS = new RenJS('mainnet');
+	public renNetwork = Ethereum;
 }
 
 export class BscNetwork implements Network {
@@ -35,6 +46,13 @@ export class BscNetwork implements Network {
 	readonly networkId = NETWORK_IDS.BSC;
 	readonly fullName = 'Binance Smart Chain';
 	public tokens = getTokens(NETWORK_LIST.ETH);
-	// TODO: Find out the proper name for bsc mainnet in renJS
-	public renJS = new RenJS('mainnet');
+	public renNetwork = BinanceSmartChain;
+}
+
+export class MaticNetwork implements Network {
+	readonly name = NETWORK_LIST.MATIC;
+	readonly networkId = NETWORK_IDS.MATIC;
+	readonly fullName = 'Polygon';
+	public tokens = getTokens(NETWORK_LIST.MATIC);
+	public renNetwork = Polygon;
 }

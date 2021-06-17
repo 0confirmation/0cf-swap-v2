@@ -51,26 +51,26 @@ const useStyles = makeStyles((theme: Theme) => ({
  * Retrieves the balance of the liquidity pool from the Zero protocol
  * @param zero = instance of the Zero SDK class
  */
-const getLiquidity = async (zero: any) => {
-	if (!zero) return;
-	const { makeManagerClass } = require('@0confirmation/eth-manager');
-	const ERC20 = makeManagerClass(require('@0confirmation/sol/build/DAI')); // will make an ethers.js wrapper compatible with DAI, which is a mock token that exports the ERC20 ABI
-	const environments = require('@0confirmation/sdk/environments');
-	const mainnet = environments.getAddresses('mainnet');
-	const renbtc = new ERC20(mainnet.renbtc, zero.getProvider().asEthers());
+// const getLiquidity = async (zero: any) => {
+// 	if (!zero) return;
+// 	const { makeManagerClass } = require('@0confirmation/eth-manager');
+// 	const ERC20 = makeManagerClass(require('@0confirmation/sol/build/DAI')); // will make an ethers.js wrapper compatible with DAI, which is a mock token that exports the ERC20 ABI
+// 	const environments = require('@0confirmation/sdk/environments');
+// 	const mainnet = environments.getAddresses('mainnet');
+// 	const renbtc = new ERC20(mainnet.renbtc, zero.getProvider().asEthers());
 
-	const zeroBTC = await zero.getLiquidityTokenFor(mainnet.renbtc);
-	const liquidityPoolRenBTCHoldings = await renbtc.balanceOf(zeroBTC.address);
-	console.log(String(liquidityPoolRenBTCHoldings));
-};
+// 	const zeroBTC = await zero.getLiquidityTokenFor(mainnet.renbtc);
+// 	const liquidityPoolRenBTCHoldings = await renbtc.balanceOf(zeroBTC.address);
+// 	console.log(String(liquidityPoolRenBTCHoldings));
+// };
 
 export const Swap = observer(() => {
 	const classes = useStyles();
 	const store = useContext(StoreContext);
 	const {
-		zero: { zero },
 		currency: { loadPrices },
 		fees: { gasFee, getAllFees },
+		wallet: { loading },
 	} = store;
 
 	const [selectedCoin, setSelectedCoin] = useState(SUPPORTED_TOKEN_NAMES.USDC);
@@ -104,16 +104,16 @@ export const Swap = observer(() => {
 	 * if so, set an interval to regularly update the liquidity
 	 * pool holdings.
 	 */
-	useEffect(() => {
-		const liquidityInterval = setInterval(() => {
-			Promise.all([getLiquidity(zero)]);
-		}, 1000 * 360);
-		if (zero) {
-			Promise.all([getLiquidity(zero)]);
-		} else {
-			clearInterval(liquidityInterval);
-		}
-	}, [zero]);
+	// useEffect(() => {
+	// 	const liquidityInterval = setInterval(() => {
+	// 		Promise.all([getLiquidity(zero)]);
+	// 	}, 1000 * 360);
+	// 	if (zero) {
+	// 		Promise.all([getLiquidity(zero)]);
+	// 	} else {
+	// 		clearInterval(liquidityInterval);
+	// 	}
+	// }, [zero]);
 
 	const handleSelectedCoin = async (name: SUPPORTED_TOKEN_NAMES) => {
 		setSelectedCoin(name);
@@ -148,6 +148,7 @@ export const Swap = observer(() => {
 	const handleFromAmount = async (amount: string) => {
 		setUpdateSide('from');
 		setFromAmount(amount);
+
 		await loadPrices();
 		const bnAmount = new BigNumber(amount);
 		const trade = bnAmount.gt(0)

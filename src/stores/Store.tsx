@@ -29,6 +29,7 @@ export class Store {
 
 		if (chain) {
 			const refreshData = [
+				this.currency.setTokens(),
 				this.currency.loadPrices(),
 				this.currency.loadBtcBlockTime(),
 				this.currency.loadBtcBlockHeight(),

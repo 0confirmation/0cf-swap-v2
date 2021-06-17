@@ -26,6 +26,7 @@ export default class CurrencyStore {
 		this.store = store;
 		this.prices = undefined;
 		this.tokenMapCache = {};
+		this.tokens = [];
 		this.btcConfirmationTime = undefined;
 		this.btcPriceHistory = undefined;
 		this.btcBlockHeight = undefined;
@@ -37,16 +38,11 @@ export default class CurrencyStore {
 			btcPriceHistory: undefined,
 			btcBlockHeight: undefined,
 		});
-
-		this.tokens = this.store.wallet.network.tokens.map((token: TokenDefinition) => {
-			return new Token(this.store, token.address, token.name, token.symbol, token.decimals);
-		});
-		this.tokenMapCache = Object.assign({}, ...this.tokens.map((token) => ({ [token.name]: token })));
-		// console.log('tokens:', this.tokens, this.tokenMapCache);
 		this.init();
 	}
 
 	init = action(async (): Promise<void> => {
+		this.setTokens();
 		await this.loadPrices();
 		await this.loadBtcBlockTime();
 		await this.loadBtcBlockHeight();
@@ -55,6 +51,13 @@ export default class CurrencyStore {
 	get tokenMap(): TokenMap | null | undefined {
 		return this.tokenMapCache;
 	}
+
+	setTokens = action(() => {
+		this.tokens = this.store.wallet.network.tokens.map((token: TokenDefinition) => {
+			return new Token(this.store, token.address, token.name, token.symbol, token.decimals);
+		});
+		this.tokenMapCache = Object.assign({}, ...this.tokens.map((token) => ({ [token.name]: token })));
+	});
 
 	setTokenMap = action((tokenMap: TokenMap): void => {
 		this.tokenMapCache = tokenMap;
@@ -81,6 +84,7 @@ export default class CurrencyStore {
 	});
 
 	loadPrices = action(async (): Promise<void> => {
+		if (this.store.wallet.loading) return;
 		this.setPrices(await fetchPrices(this.store));
 		if (!this.prices) return;
 

@@ -5,9 +5,10 @@ import Onboard from 'bnc-onboard';
 import Notify from 'bnc-notify';
 import { notifyOptions, onboardWalletCheck, getOnboardWallets } from '../config/wallets';
 import { action, extendObservable, runInAction } from 'mobx';
-import { getNetwork, getNetworkNameFromId } from '../utils/network';
+import { getNetwork, getNetworkFromProvider, getNetworkNameFromId } from '../utils/network';
 import type { Network } from '../config/models/network';
 import { ethers } from 'ethers';
+import RenJS from '@renproject/ren';
 
 export default class WalletStore {
 	private store: Store;
@@ -17,11 +18,15 @@ export default class WalletStore {
 	public notify: NotifyAPI;
 	public currentBlock?: number;
 	public provider: ethers.providers.Web3Provider | undefined;
+	public loading: boolean;
+	public renJS: RenJS;
 
 	constructor(store: Store) {
 		this.network = getNetwork();
 		this.store = store;
 		this.notify = Notify(notifyOptions);
+		this.loading = false;
+		this.renJS = new RenJS('mainnet');
 
 		//TODO: Update CSS for onboard modal
 		const onboardOptions = {
@@ -34,6 +39,7 @@ export default class WalletStore {
 				wallet: (wallet: Wallet) => {
 					if (wallet.name) window.localStorage.setItem('selectedWallet', wallet.name);
 				},
+				network: this.checkNetwork,
 			},
 			walletSelect: {
 				heading: 'Connect to Zero Swap',
@@ -51,6 +57,7 @@ export default class WalletStore {
 			currentBlock: undefined,
 			gasFee: undefined,
 			provider: undefined,
+			loading: false,
 		});
 
 		this.init();
@@ -88,6 +95,10 @@ export default class WalletStore {
 		}
 	});
 
+	setLoading = action((status: boolean): void => {
+		this.loading = status;
+	});
+
 	isCached = action(() => {
 		return !!this.connectedAddress || !!window.localStorage.getItem('selectedWallet');
 	});
@@ -98,8 +109,8 @@ export default class WalletStore {
 		if (this.checkSupportedNetwork(provider)) {
 			this.onboard = wsOnboard;
 			this.provider = provider;
-			this.setAddress(walletState.address);
-			this.store.zero.setZero(this.provider);
+			this.setAddress(wsOnboard.getState().address);
+			this.store.zero.setZero(provider);
 			Promise.all([this.store.storeRefresh()]);
 		} else {
 			this.walletReset();
@@ -139,4 +150,27 @@ export default class WalletStore {
 		}
 		return false;
 	};
+
+	checkNetwork = action(async (): Promise<void> => {
+		const walletState = this.onboard.getState();
+		const walletName = walletState.wallet.name;
+		const newProvider = new ethers.providers.Web3Provider(walletState.wallet.provider);
+		if (!walletName) return;
+
+		// If this returns undefined, the network is not supported.
+		const connectedNetwork = await getNetworkFromProvider(newProvider);
+
+		if (!connectedNetwork) {
+			this.onboard.walletReset();
+			window.localStorage.removeItem('selectedWallet');
+			return;
+		}
+		const newNetwork = getNetwork(connectedNetwork);
+		if (newNetwork.networkId !== this.network.networkId) {
+			this.network = newNetwork;
+			this.provider = newProvider;
+			this.store.storeRefresh();
+		}
+		return;
+	});
 }

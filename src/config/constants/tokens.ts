@@ -2,6 +2,7 @@ import usdcIcon from '@iconify/icons-cryptocurrency/usdc';
 import daiIcon from '@iconify/icons-cryptocurrency/dai';
 import ethIcon from '@iconify/icons-cryptocurrency/eth';
 import btcIcon from '@iconify/icons-cryptocurrency/btc';
+import maticIcon from '@iconify/icons-cryptocurrency/matic';
 import type { IconifyIcon } from '@iconify/react';
 
 export interface TokenDefinition {
@@ -17,6 +18,7 @@ export enum SUPPORTED_TOKEN_NAMES {
 	DAI = 'DAI',
 	ETH = 'Ethereum',
 	WBTC = 'wBTC',
+	MATIC = 'Matic',
 }
 
 export const ETH_TOKENS: TokenDefinition[] = [
@@ -65,5 +67,43 @@ export const BSC_TOKENS: TokenDefinition[] = [
 		address: '0x1AF3F329e8BE154074D8769D1FFa4eE058B1DBc3',
 		decimals: 18,
 		icon: daiIcon as unknown as IconifyIcon,
+	},
+];
+
+export const MATIC_TOKENS: TokenDefinition[] = [
+	{
+		name: SUPPORTED_TOKEN_NAMES.USDC,
+		symbol: 'USDC',
+		address: '0x2791Bca1f2de4661ED88A30C99A7a9449Aa84174',
+		decimals: 6,
+		icon: usdcIcon as unknown as IconifyIcon,
+	},
+	{
+		name: SUPPORTED_TOKEN_NAMES.DAI,
+		symbol: 'DAI',
+		address: '0x8f3Cf7ad23Cd3CaDbD9735AFf958023239c6A063',
+		decimals: 18,
+		icon: daiIcon as unknown as IconifyIcon,
+	},
+	{
+		name: SUPPORTED_TOKEN_NAMES.WBTC,
+		symbol: 'wBTC',
+		address: '0x1BFD67037B42Cf73acF2047067bd4F2C47D9BfD6',
+		decimals: 8,
+		icon: btcIcon as unknown as IconifyIcon,
+	},
+	{
+		name: SUPPORTED_TOKEN_NAMES.ETH,
+		symbol: 'ETH',
+		address: '0x7ceB23fD6bC0adD59E62ac25578270cFf1b9f619',
+		decimals: 18,
+		icon: ethIcon as unknown as IconifyIcon,
+	},
+	{
+		name: SUPPORTED_TOKEN_NAMES.MATIC,
+		symbol: 'MATIC',
+		address: '0x0d500B1d8E8eF31E21C99d1Db9A6444d3ADf1270',
+		decimals: 18,
+		icon: maticIcon as unknown as IconifyIcon,
 	},
 ];

@@ -4,6 +4,8 @@ import { NETWORK_LIST } from '../config/constants/network';
 import { action, extendObservable } from 'mobx';
 import { FeeDescription, RenFees } from '../config/models/currency';
 import { SUPPORTED_TOKEN_NAMES } from '../config/constants/tokens';
+import { cancelInterval } from '../utils/helpers';
+import { Bitcoin } from '@renproject/chains-bitcoin';
 
 export default class FeeStore {
 	private readonly store!: Store;
@@ -52,12 +54,26 @@ export default class FeeStore {
 	/* Pull mint fee from renJS
 	 */
 	private async _getRenMintFee(): Promise<RenFees> {
-		const renJS = this.store.wallet.network.renJS;
-		const fees = await renJS.getFees();
-		return {
-			mintFee: new BigNumber(fees.btc.ethereum.mint).dividedBy(1e4),
-			networkFee: new BigNumber(fees.btc.lock).dividedBy(1e8),
-		};
+		if (this.store.wallet.provider) {
+			const renJS = this.store.wallet.renJS;
+			const renNetwork = this.store.wallet.network.renNetwork;
+			const onboardProvider = this.store.wallet.onboard.getState().wallet.provider;
+
+			const fees = await renJS.getFees({
+				asset: 'BTC',
+				from: Bitcoin(),
+				to: renNetwork(onboardProvider, 'mainnet'),
+			});
+			return {
+				mintFee: new BigNumber(fees.mint).dividedBy(1e4),
+				networkFee: new BigNumber(fees.lock ?? 0).dividedBy(1e8),
+			};
+		} else {
+			return {
+				mintFee: new BigNumber(0),
+				networkFee: new BigNumber(0),
+			};
+		}
 	}
 
 	setGasFee = action((value: FeeDescription) => {
@@ -88,6 +104,11 @@ export default class FeeStore {
 						this.setGasFee(value);
 					});
 				}, 1000 * 13);
+				break;
+			case NETWORK_LIST.MATIC:
+				this._getRenMintFee().then((value: RenFees) => {
+					this.setRenFee(value.mintFee, value.networkFee);
+				});
 		}
 	});
 
@@ -117,10 +138,6 @@ export default class FeeStore {
 			value: undefined,
 			scalar: undefined,
 		};
-		this.cancelGasInterval();
+		cancelInterval(this.gasInterval);
 	});
-
-	cancelGasInterval = () => {
-		if (this.gasInterval) clearInterval(this.gasInterval);
-	};
 }

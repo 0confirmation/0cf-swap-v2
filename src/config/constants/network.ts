@@ -8,6 +8,7 @@ export const PORTIS_APP_ID = '72ef7613-7d8d-407e-88eb-b6afb998c990';
 export enum NETWORK_LIST {
 	BSC = 'bsc',
 	ETH = 'eth',
+	MATIC = 'matic',
 }
 
 export enum NETWORK_IDS {

@@ -44,7 +44,6 @@ export const BitcoinPayment = observer((props: PaymentModalProps): JSX.Element =
 	};
 
 	const buttonStatus = (): BUTTON_STATUS => {
-		console.log('check', connectedAddress, !!keepers, keepers ? Object.keys(keepers).length : undefined);
 		if (!!connectedAddress && !!keepers && Object.keys(keepers).length > 0) return BUTTON_STATUS.keeperConnected;
 		else if (!!connectedAddress && (!keepers || Object.keys(keepers).length <= 0)) return BUTTON_STATUS.noKeeper;
 		else return BUTTON_STATUS.disconnected;
