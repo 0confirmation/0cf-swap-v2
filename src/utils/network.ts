@@ -59,8 +59,7 @@ export const getNetworkFromProvider = async (provider: ethers.providers.Web3Prov
 	const currentNetwork = await provider.getNetwork();
 	const chainId = currentNetwork?.chainId ?? null;
 	if (chainId) {
-		const name = getNetworkNameFromId(chainId);
-		return name;
+		return getNetworkNameFromId(chainId);
 	}
 	return null;
 };

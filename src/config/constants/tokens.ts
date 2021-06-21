@@ -3,7 +3,9 @@ import daiIcon from '@iconify/icons-cryptocurrency/dai';
 import ethIcon from '@iconify/icons-cryptocurrency/eth';
 import btcIcon from '@iconify/icons-cryptocurrency/btc';
 import maticIcon from '@iconify/icons-cryptocurrency/matic';
+import bnbIcon from '@iconify/icons-cryptocurrency/bnb';
 import type { IconifyIcon } from '@iconify/react';
+import { NETWORK_LIST } from './network';
 
 export interface TokenDefinition {
 	name: SUPPORTED_TOKEN_NAMES;
@@ -13,13 +15,42 @@ export interface TokenDefinition {
 	icon: IconifyIcon;
 }
 
+export type BaseCurrency = {
+	[network in NETWORK_LIST]: TokenDefinition;
+};
+
 export enum SUPPORTED_TOKEN_NAMES {
 	USDC = 'USDC',
 	DAI = 'DAI',
 	ETH = 'Ethereum',
 	WBTC = 'wBTC',
 	MATIC = 'Matic',
+	BNB = 'BNB',
 }
+
+export const BASE_CURRENCY: BaseCurrency = {
+	[NETWORK_LIST.ETH]: {
+		name: SUPPORTED_TOKEN_NAMES.ETH,
+		symbol: 'ETH',
+		address: '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2',
+		decimals: 18,
+		icon: ethIcon as unknown as IconifyIcon,
+	},
+	[NETWORK_LIST.MATIC]: {
+		name: SUPPORTED_TOKEN_NAMES.MATIC,
+		symbol: 'MATIC',
+		address: '0x0d500B1d8E8eF31E21C99d1Db9A6444d3ADf1270',
+		decimals: 18,
+		icon: maticIcon as unknown as IconifyIcon,
+	},
+	[NETWORK_LIST.BSC]: {
+		name: SUPPORTED_TOKEN_NAMES.BNB,
+		symbol: 'BNB',
+		address: '0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c',
+		decimals: 18,
+		icon: bnbIcon as unknown as IconifyIcon,
+	},
+};
 
 export const ETH_TOKENS: TokenDefinition[] = [
 	{
@@ -67,6 +98,20 @@ export const BSC_TOKENS: TokenDefinition[] = [
 		address: '0x1AF3F329e8BE154074D8769D1FFa4eE058B1DBc3',
 		decimals: 18,
 		icon: daiIcon as unknown as IconifyIcon,
+	},
+	{
+		name: SUPPORTED_TOKEN_NAMES.BNB,
+		symbol: 'BNB',
+		address: '0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c',
+		decimals: 18,
+		icon: bnbIcon as unknown as IconifyIcon,
+	},
+	{
+		name: SUPPORTED_TOKEN_NAMES.WBTC,
+		symbol: 'BTCB',
+		address: '0x7130d2a12b9bcbfae4f2634d864a1ee1ce3ead9c',
+		decimals: 18,
+		icon: btcIcon as unknown as IconifyIcon,
 	},
 ];
 

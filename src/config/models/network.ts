@@ -1,5 +1,5 @@
 import { NETWORK_LIST, NETWORK_IDS } from '../constants/network';
-import { TokenDefinition } from '../constants/tokens';
+import { BASE_CURRENCY, TokenDefinition } from '../constants/tokens';
 import { getTokens } from '../../utils/helpers';
 import {
 	EthereumClass,
@@ -27,6 +27,10 @@ export interface Network {
 	networkId: number;
 	fullName: string;
 	tokens: TokenDefinition[];
+	gasEndpoint?: string;
+	gasSpeed?: string;
+	baseCurrency: TokenDefinition;
+	gasDivisor: number;
 	renNetwork:
 		| CallableConstructor<typeof EthereumClass>
 		| CallableConstructor<typeof PolygonClass>
@@ -38,6 +42,10 @@ export class EthNetwork implements Network {
 	readonly networkId = NETWORK_IDS.ETH;
 	readonly fullName = 'Ethereum';
 	public tokens = getTokens(NETWORK_LIST.ETH);
+	public gasEndpoint = 'https://www.gasnow.org/api/v3/gas/price?utm_source=zerodao';
+	public gasSpeed = 'rapid';
+	public gasDivisor = 1e9;
+	public baseCurrency = BASE_CURRENCY[NETWORK_LIST.ETH];
 	public renNetwork = Ethereum;
 }
 
@@ -46,6 +54,8 @@ export class BscNetwork implements Network {
 	readonly networkId = NETWORK_IDS.BSC;
 	readonly fullName = 'Binance Smart Chain';
 	public tokens = getTokens(NETWORK_LIST.ETH);
+	public baseCurrency = BASE_CURRENCY[NETWORK_LIST.BSC];
+	public gasDivisor = 1;
 	public renNetwork = BinanceSmartChain;
 }
 
@@ -54,5 +64,9 @@ export class MaticNetwork implements Network {
 	readonly networkId = NETWORK_IDS.MATIC;
 	readonly fullName = 'Polygon';
 	public tokens = getTokens(NETWORK_LIST.MATIC);
+	public baseCurrency = BASE_CURRENCY[NETWORK_LIST.MATIC];
+	public gasEndpoint = 'https://gasstation-mainnet.matic.network';
+	public gasSpeed = 'fastest';
+	public gasDivisor = 1;
 	public renNetwork = Polygon;
 }

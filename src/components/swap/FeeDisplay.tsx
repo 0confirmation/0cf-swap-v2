@@ -59,7 +59,6 @@ export const FeeDisplay = observer((props: SwapToProps): JSX.Element | null => {
 	const _calcTotalFee = (): string => {
 		if (!mintFee.scalar || !gasFee.value || !zeroFee.scalar || !btcFee.value) return '0';
 
-		// TODO: include gas estimate in here
 		return bnAmount
 			.multipliedBy(mintFee.scalar)
 			.plus(bnAmount.multipliedBy(zeroFee.scalar))

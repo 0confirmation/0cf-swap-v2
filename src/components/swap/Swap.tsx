@@ -70,7 +70,6 @@ export const Swap = observer(() => {
 	const {
 		currency: { loadPrices },
 		fees: { gasFee, getAllFees },
-		wallet: { loading },
 	} = store;
 
 	const [selectedCoin, setSelectedCoin] = useState(SUPPORTED_TOKEN_NAMES.USDC);

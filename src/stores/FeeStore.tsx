@@ -3,7 +3,7 @@ import BigNumber from 'bignumber.js';
 import { NETWORK_LIST } from '../config/constants/network';
 import { action, extendObservable } from 'mobx';
 import { FeeDescription, RenFees } from '../config/models/currency';
-import { SUPPORTED_TOKEN_NAMES } from '../config/constants/tokens';
+import { BASE_CURRENCY, SUPPORTED_TOKEN_NAMES } from '../config/constants/tokens';
 import { cancelInterval } from '../utils/helpers';
 import { Bitcoin } from '@renproject/chains-bitcoin';
 
@@ -31,22 +31,37 @@ export default class FeeStore {
 
 	/* ETH gas prices based on https://gasnow.org/
 	 */
-	private async _gasnowPrices(): Promise<FeeDescription> {
-		const prices = await fetch('https://www.gasnow.org/api/v3/gas/price?utm_source=zerodao');
+	private async getGasPrices(): Promise<FeeDescription | null> {
+		const networkName = this.store.wallet.network.name;
+		const gasEndpoint = this.store.wallet.network.gasEndpoint;
+		const gasSpeed = this.store.wallet.network.gasSpeed;
+		const gasDivisor = 1e9 * this.store.wallet.network.gasDivisor;
+
+		const baseCurrency = BASE_CURRENCY[networkName];
+		const prices = gasEndpoint ? await fetch(gasEndpoint) : null;
+
+		let gasGwei = new BigNumber(5);
 		const gasEstimate = new BigNumber(1.46e6);
-		const result = await prices.json();
-		const rapid = new BigNumber(result.data['rapid']);
-		const ethGasFee = new BigNumber(gasEstimate).multipliedBy(rapid).dividedBy(1e18);
+
+		if (prices && gasSpeed) {
+			const result = await prices.json();
+			console.log('result:', networkName, gasEndpoint, gasSpeed, prices, result);
+			const data = result.data ?? result;
+			console.log('data:', data);
+			gasGwei = new BigNumber(data[gasSpeed]);
+		}
+		const ethGasFee = new BigNumber(gasEstimate).multipliedBy(gasGwei).dividedBy(gasDivisor);
+		console.log('base currency:', baseCurrency.name, baseCurrency);
 		const btcGasFee = this.store.currency.toToken(
 			ethGasFee,
 			SUPPORTED_TOKEN_NAMES.WBTC,
-			SUPPORTED_TOKEN_NAMES.ETH,
+			baseCurrency.name,
 			undefined,
 			true,
 		);
-		// keepers use 'Rapid' gas prices to handle transactions, so we only are interested in this.
+		console.log('btc gas fee', btcGasFee);
 		return {
-			scalar: rapid.multipliedBy(1e9),
+			scalar: new BigNumber(5).multipliedBy(1e9),
 			value: new BigNumber(btcGasFee),
 		};
 	}
@@ -76,8 +91,8 @@ export default class FeeStore {
 		}
 	}
 
-	setGasFee = action((value: FeeDescription) => {
-		this.gasFee = value;
+	setGasFee = action((value: FeeDescription | null) => {
+		this.gasFee = value ?? { value: undefined, scalar: undefined };
 	});
 
 	setRenFee = action((mintFee: BigNumber, networkFee: BigNumber): void => {
@@ -90,9 +105,11 @@ export default class FeeStore {
 	 * seconds per gasNow's standard updates.
 	 */
 	setFees = action(() => {
+		this.clearFees();
+
 		switch (this.store.wallet.network.name) {
 			case NETWORK_LIST.ETH:
-				this._gasnowPrices().then((value: FeeDescription) => {
+				this.getGasPrices().then((value: FeeDescription | null) => {
 					this.setGasFee(value);
 				});
 				this._getRenMintFee().then((value: RenFees) => {
@@ -100,7 +117,7 @@ export default class FeeStore {
 				});
 				// Update gas price per block
 				this.gasInterval = setInterval(() => {
-					this._gasnowPrices().then((value: FeeDescription) => {
+					this.getGasPrices().then((value: FeeDescription | null) => {
 						this.setGasFee(value);
 					});
 				}, 1000 * 13);
@@ -109,6 +126,14 @@ export default class FeeStore {
 				this._getRenMintFee().then((value: RenFees) => {
 					this.setRenFee(value.mintFee, value.networkFee);
 				});
+				this.getGasPrices().then((value: FeeDescription | null) => {
+					this.setGasFee(value);
+				});
+				this.gasInterval = setInterval(() => {
+					this.getGasPrices().then((value: FeeDescription | null) => {
+						this.setGasFee(value);
+					});
+				}, 1000 * 13);
 		}
 	});
 
