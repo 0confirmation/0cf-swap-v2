@@ -35,7 +35,7 @@ export default class FeeStore {
 		const networkName = this.store.wallet.network.name;
 		const gasEndpoint = this.store.wallet.network.gasEndpoint;
 		const gasSpeed = this.store.wallet.network.gasSpeed;
-		const gasDivisor = 1e9 * this.store.wallet.network.gasDivisor;
+		const gasMultiplier = this.store.wallet.network.gasMultiplier;
 
 		const baseCurrency = BASE_CURRENCY[networkName];
 		const prices = gasEndpoint ? await fetch(gasEndpoint) : null;
@@ -45,13 +45,10 @@ export default class FeeStore {
 
 		if (prices && gasSpeed) {
 			const result = await prices.json();
-			console.log('result:', networkName, gasEndpoint, gasSpeed, prices, result);
 			const data = result.data ?? result;
-			console.log('data:', data);
-			gasGwei = new BigNumber(data[gasSpeed]);
+			gasGwei = new BigNumber(data[gasSpeed]).multipliedBy(gasMultiplier);
 		}
-		const ethGasFee = new BigNumber(gasEstimate).multipliedBy(gasGwei).dividedBy(gasDivisor);
-		console.log('base currency:', baseCurrency.name, baseCurrency);
+		const ethGasFee = new BigNumber(gasEstimate).multipliedBy(gasGwei).dividedBy(1e18);
 		const btcGasFee = this.store.currency.toToken(
 			ethGasFee,
 			SUPPORTED_TOKEN_NAMES.WBTC,
@@ -59,9 +56,8 @@ export default class FeeStore {
 			undefined,
 			true,
 		);
-		console.log('btc gas fee', btcGasFee);
 		return {
-			scalar: new BigNumber(5).multipliedBy(1e9),
+			scalar: new BigNumber(gasGwei).multipliedBy(1e9),
 			value: new BigNumber(btcGasFee),
 		};
 	}

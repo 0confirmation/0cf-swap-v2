@@ -134,7 +134,7 @@ export default class CurrencyStore {
 		const toPrice = this.prices[tokenName];
 		const fromPrice = this.prices[fromName];
 
-		if (!toPrice || !fromPrice) return '-';
+		if (!toPrice || !fromPrice) return '0.00';
 
 		const normal =
 			fromName !== SUPPORTED_TOKEN_NAMES.WBTC

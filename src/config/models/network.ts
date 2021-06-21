@@ -30,7 +30,7 @@ export interface Network {
 	gasEndpoint?: string;
 	gasSpeed?: string;
 	baseCurrency: TokenDefinition;
-	gasDivisor: number;
+	gasMultiplier: number;
 	renNetwork:
 		| CallableConstructor<typeof EthereumClass>
 		| CallableConstructor<typeof PolygonClass>
@@ -44,7 +44,7 @@ export class EthNetwork implements Network {
 	public tokens = getTokens(NETWORK_LIST.ETH);
 	public gasEndpoint = 'https://www.gasnow.org/api/v3/gas/price?utm_source=zerodao';
 	public gasSpeed = 'rapid';
-	public gasDivisor = 1e9;
+	public gasMultiplier = 1;
 	public baseCurrency = BASE_CURRENCY[NETWORK_LIST.ETH];
 	public renNetwork = Ethereum;
 }
@@ -55,7 +55,7 @@ export class BscNetwork implements Network {
 	readonly fullName = 'Binance Smart Chain';
 	public tokens = getTokens(NETWORK_LIST.ETH);
 	public baseCurrency = BASE_CURRENCY[NETWORK_LIST.BSC];
-	public gasDivisor = 1;
+	public gasMultiplier = 1e9;
 	public renNetwork = BinanceSmartChain;
 }
 
@@ -67,6 +67,6 @@ export class MaticNetwork implements Network {
 	public baseCurrency = BASE_CURRENCY[NETWORK_LIST.MATIC];
 	public gasEndpoint = 'https://gasstation-mainnet.matic.network';
 	public gasSpeed = 'fastest';
-	public gasDivisor = 1;
+	public gasMultiplier = 1e9;
 	public renNetwork = Polygon;
 }

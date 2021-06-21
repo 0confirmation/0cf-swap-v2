@@ -167,7 +167,9 @@ export default class WalletStore {
 		}
 		const newNetwork = getNetwork(connectedNetwork);
 		if (newNetwork.networkId !== this.network.networkId) {
-			this.network = newNetwork;
+			runInAction(() => {
+				this.network = newNetwork;
+			});
 			this.provider = newProvider;
 			this.store.storeRefresh();
 		}
