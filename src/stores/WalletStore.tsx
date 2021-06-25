@@ -154,8 +154,8 @@ export default class WalletStore {
 	checkNetwork = action(async (): Promise<void> => {
 		const walletState = this.onboard.getState();
 		const walletName = walletState.wallet.name;
+		if (!walletName || !walletState.wallet.provider) return;
 		const newProvider = new ethers.providers.Web3Provider(walletState.wallet.provider);
-		if (!walletName) return;
 
 		// If this returns undefined, the network is not supported.
 		const connectedNetwork = await getNetworkFromProvider(newProvider);

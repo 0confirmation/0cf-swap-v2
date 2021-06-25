@@ -2,3 +2,15 @@
 .bn-onboard-custom.bn-onboard-modal {
 	z-index: 999999;
 }
+
+#root {
+	height: 100%;
+}
+
+html {
+	height: 100%;
+}
+
+body {
+	height: 100%;
+}

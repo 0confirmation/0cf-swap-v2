@@ -1,34 +1,31 @@
 import Sidebar from './components/common/Sidebar/Sidebar';
 import Navbar from './components/common/Navbar/Navbar';
 import { Container, CssBaseline, ThemeProvider } from '@material-ui/core';
-import store, { StoreProvider } from './stores/Store';
-import { MobxRouter, startRouter } from 'mobx-router';
-import routes from './config/routes';
+import { Store, StoreProvider } from './stores/Store';
+import { MobxRouter } from 'mobx-router';
 import { Snackbar } from './components/common/Snackbar';
 import { sushiTheme } from './config/themes';
 
 const theme = sushiTheme;
 
-startRouter(routes, store, {
-	html5history: true, // or false if you want to use hash based routing
-});
+export interface AppProps {
+	store: Store;
+}
 
-function App() {
+function App(props: AppProps) {
 	return (
-		<div>
-			<StoreProvider value={store}>
-				<ThemeProvider theme={theme}>
-					<CssBaseline />
-					<Snackbar>
-						<Navbar />
-						<Container maxWidth={false}>
-							<MobxRouter store={store} />
-						</Container>
-						<Sidebar />
-					</Snackbar>
-				</ThemeProvider>
-			</StoreProvider>
-		</div>
+		<StoreProvider value={props.store}>
+			<ThemeProvider theme={theme}>
+				<CssBaseline />
+				<Snackbar>
+					<Navbar />
+					<Container maxWidth={false} style={{ height: '100%' }}>
+						<MobxRouter store={props.store} />
+					</Container>
+					<Sidebar />
+				</Snackbar>
+			</ThemeProvider>
+		</StoreProvider>
 	);
 }
 

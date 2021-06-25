@@ -35,14 +35,14 @@ export const SidebarListItem = (props: SidebarListItemProps): JSX.Element => {
 	const { goTo } = store.router;
 	const { collapsedHeader, toggleSidebar } = store.ui;
 
-	const handleRoute = (path: Route<Store, any, any> | undefined, url: string | undefined): Promise<void> | void => {
+	const handleRoute = async (path: Route<Store, any, any> | undefined, url: string | undefined): Promise<void> => {
 		if (!collapsedHeader) toggleSidebar();
 		if (path) {
-			return goTo(path);
+			await goTo(path);
 		} else {
 			window.open(url);
-			return;
 		}
+		return;
 	};
 
 	return (
@@ -52,7 +52,6 @@ export const SidebarListItem = (props: SidebarListItemProps): JSX.Element => {
 			className={classes.listButton}
 			key={`sidebar-${title}`}
 			onClick={() => {
-				// We only want the sidebar to close if
 				handleRoute(view, url);
 			}}
 		>

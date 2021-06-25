@@ -1,7 +1,5 @@
 import React, { ChangeEvent, MouseEvent, useContext, useEffect, useState } from 'react';
-import { Grid, Container, Paper } from '@material-ui/core';
-import { DRAWER_WIDTH } from '../../config/constants/ui';
-import { navHeight } from '../common/Navbar/Navbar';
+import { Grid, Paper } from '@material-ui/core';
 import { Theme, makeStyles } from '@material-ui/core/styles';
 import { StoreContext } from '../../stores/Store';
 import { observer } from 'mobx-react-lite';
@@ -15,30 +13,9 @@ import { BigNumber } from 'bignumber.js';
 import { fetchTrade, numberWithCommas, valueAfterFees } from '../../utils/helpers';
 import { TradeType } from '@sushiswap/sdk';
 import { GasReserve } from './GasReserve';
+import { MainContainer, PaperContainer } from '../common/Styles';
 
 const useStyles = makeStyles((theme: Theme) => ({
-	mainContainer: {
-		// Reason: typescript doesn't allow for custom classes on material-ui
-		// @ts-ignore
-		background: `radial-gradient(circle at 50%, ${theme.palette.custom.backgroundCircle}, ${theme.palette.background.default} 50%)`,
-		[theme.breakpoints.up('md')]: {
-			paddingLeft: DRAWER_WIDTH + 48,
-			// @ts-ignore
-			background: `radial-gradient(circle at 60%, ${theme.palette.custom.backgroundCircle}, ${theme.palette.background.default} 50%)`,
-		},
-		paddingTop: `${navHeight + 1.5}rem`,
-		[theme.breakpoints.down('sm')]: {
-			marginLeft: theme.spacing(1),
-			marginRight: theme.spacing(1),
-			paddingLeft: 0,
-			paddingRight: 0,
-		},
-	},
-	swapContainer: {
-		paddingBottom: theme.spacing(6),
-		justifyContent: 'center',
-		display: 'flex',
-	},
 	infoPaper: {
 		padding: theme.spacing(2),
 	},
@@ -181,8 +158,8 @@ export const Swap = observer(() => {
 		if (amount !== null) setReserveAmount(amount);
 	};
 	return (
-		<Container className={classes.mainContainer}>
-			<Grid item className={classes.swapContainer}>
+		<MainContainer>
+			<PaperContainer>
 				<Grid item xs={12} sm={8}>
 					<Paper className={classes.infoPaper}>
 						<SwapFrom amount={fromAmount} handleFromAmount={handleFromAmount} />
@@ -203,8 +180,8 @@ export const Swap = observer(() => {
 						<FeeDisplay selectedCoin={selectedCoin} amount={fromAmount} priceImpact={priceImpact} />
 					</Paper>
 				</Grid>
-			</Grid>
+			</PaperContainer>
 			<StatsDisplay />
-		</Container>
+		</MainContainer>
 	);
 });

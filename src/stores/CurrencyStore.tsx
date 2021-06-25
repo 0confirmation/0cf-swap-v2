@@ -84,7 +84,7 @@ export default class CurrencyStore {
 	});
 
 	loadPrices = action(async (): Promise<void> => {
-		if (this.store.wallet.loading) return;
+		if (this.store.wallet.loading || !this.store.wallet.provider) return;
 		this.setPrices(await fetchPrices(this.store));
 		if (!this.prices) return;
 

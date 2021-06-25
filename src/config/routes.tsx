@@ -1,15 +1,23 @@
 import React from 'react';
 
 import { Route } from 'mobx-router';
-import type { Store } from '../stores/Store';
+import type { Store as RootStore } from '../stores/Store';
 import { Swap } from '../components/swap';
+import { TransactionList } from '../components/transactions/TransactionList';
 
 const routes = {
-	home: new Route<Store>({
+	home: new Route<RootStore>({
 		path: '/',
 		component: <Swap />,
 	}),
-	earn: new Route<Store>({
+	transactions: new Route<RootStore>({
+		path: '/transactions',
+		component: <TransactionList />,
+		beforeEnter: () => {
+			console.log('entering transactions');
+		},
+	}),
+	earn: new Route<RootStore>({
 		path: '/earn',
 		component: <> </>,
 	}),

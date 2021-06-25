@@ -2,13 +2,13 @@ import { NETWORK_LIST, NETWORK_IDS } from '../constants/network';
 import { BASE_CURRENCY, TokenDefinition } from '../constants/tokens';
 import { getTokens } from '../../utils/helpers';
 import {
-	EthereumClass,
-	PolygonClass,
-	BinanceSmartChainClass,
 	Ethereum,
+	EthereumClass,
 	Polygon,
+	PolygonClass,
 	BinanceSmartChain,
-} from '@renproject/chains';
+	BinanceSmartChainClass,
+} from '@renproject/chains-ethereum';
 import { CallableConstructor } from '@renproject/utils';
 
 export type NetworkConstants = {

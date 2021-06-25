@@ -44,6 +44,7 @@ export const BitcoinPayment = observer((props: PaymentModalProps): JSX.Element =
 	};
 
 	const buttonStatus = (): BUTTON_STATUS => {
+		if (process.env.NODE_ENV !== 'production') return BUTTON_STATUS.keeperConnected;
 		if (!!connectedAddress && !!keepers && Object.keys(keepers).length > 0) return BUTTON_STATUS.keeperConnected;
 		else if (!!connectedAddress && (!keepers || Object.keys(keepers).length <= 0)) return BUTTON_STATUS.noKeeper;
 		else return BUTTON_STATUS.disconnected;

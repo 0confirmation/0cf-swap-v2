@@ -40,7 +40,7 @@ export default function WalletButton() {
 					Powered By:
 				</Typography>
 				<Typography className={`${classes.secondarySubtitle}`} variant="body2">
-					0cf
+					zeroDAO
 				</Typography>
 			</ListItem>
 		</List>

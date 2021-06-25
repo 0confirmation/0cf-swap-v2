@@ -46,6 +46,7 @@ const useStyles = makeStyles((theme: Theme) =>
 const mainSidebarLinks = [
 	{ title: 'Swap', view: views.home, url: undefined, disabled: false },
 	{ title: 'Earn', view: views.earn, url: undefined, disabled: true },
+	{ title: 'Transactions', view: views.transactions, url: undefined, disabled: false },
 ];
 
 const secondarySidebarLinks = [

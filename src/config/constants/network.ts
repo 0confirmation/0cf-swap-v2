@@ -1,8 +1,8 @@
 import type { NetworkConstants } from '../models/network';
 import { ChainId } from '@sushiswap/sdk';
 
-export const APP_NAME = '0cf';
-export const CONTACT_EMAIL = 'andrew@0confirmation.com';
+export const APP_NAME = 'Zero Swap';
+export const CONTACT_EMAIL = 'mitch@zerodao.com';
 export const PORTIS_APP_ID = '72ef7613-7d8d-407e-88eb-b6afb998c990';
 
 export enum NETWORK_LIST {
