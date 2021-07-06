@@ -13,9 +13,6 @@ const routes = {
 	transactions: new Route<RootStore>({
 		path: '/transactions',
 		component: <TransactionList />,
-		beforeEnter: () => {
-			console.log('entering transactions');
-		},
 	}),
 	earn: new Route<RootStore>({
 		path: '/earn',

@@ -3,6 +3,7 @@ import { Modal, Typography, Paper, Grid, Backdrop, Fade, Button } from '@materia
 import { Theme, makeStyles } from '@material-ui/core/styles';
 import { observer } from 'mobx-react-lite';
 import { PaymentModalProps } from '../swap/PaymentButton';
+import { PaperBorder } from '../StyledComponents';
 import QRCode from '../qrScanner/index';
 
 const useStyles = makeStyles((theme: Theme) => ({
@@ -63,58 +64,61 @@ export const PaymentModal = observer((props: PaymentModalProps): JSX.Element => 
 			}}
 		>
 			<Fade in={open}>
-				<Paper className={classes.paper}>
-					<div className={classes.paymentHeaderContainer}>
-						<Typography variant="h5" className={classes.paymentHeader}>
-							Bitcoin Payment
-						</Typography>
-						<Typography>
-							You are selling <b>{fromAmount}</b> {fromCurrency} for approximately{' '}
-							<b>
-								{toAmount} {toCurrency}
-							</b>
-						</Typography>
-						<Typography variant="body2" className={classes.additionalInfo}>
-							Expected Price Impact: <b>{priceImpact}%</b>
-						</Typography>
-					</div>
-					<Grid container direction="row" justify="space-between">
-						<Grid item xs={12} md={3} className={classes.qrCode}>
-							{/* TODO: Generate QR based on address from renVM */}
-							<QRCode
-								// data={parcel && parcel.depositAddress}
-								data={'some fake parcel data here' && '3FNraEC1yo8xE8bnRzEim1vwgmpLeEdNPN'}
-								size={110}
-								framed={false}
-							/>
-						</Grid>
-						<Grid item xs={12} md={8}>
-							<Grid
-								container
-								direction="column"
-								justify="center"
-								className={classes.paymentInfoContainer}
-							>
-								<Paper variant="outlined" className={classes.paymentInfoPaper}>
-									<Grid container direction="column">
-										<Typography variant="caption">
-											To complete payment, send {fromAmount} {fromCurrency} to the below address
-										</Typography>
-										<Typography variant="caption" color="secondary">
-											{/* TODO: Generate deposit address via renVM */}
-											EXAMPLEADDRESSHERE
-										</Typography>
-									</Grid>
-								</Paper>
+				<PaperBorder>
+					<Paper className={classes.paper}>
+						<div className={classes.paymentHeaderContainer}>
+							<Typography variant="h5" className={classes.paymentHeader}>
+								Bitcoin Payment
+							</Typography>
+							<Typography>
+								You are selling <b>{fromAmount}</b> {fromCurrency} for approximately{' '}
+								<b>
+									{toAmount} {toCurrency}
+								</b>
+							</Typography>
+							<Typography variant="body2" className={classes.additionalInfo}>
+								Expected Price Impact: <b>{priceImpact}%</b>
+							</Typography>
+						</div>
+						<Grid container direction="row" justify="space-between">
+							<Grid item xs={12} md={3} className={classes.qrCode}>
+								{/* TODO: Generate QR based on address from renVM */}
+								<QRCode
+									// data={parcel && parcel.depositAddress}
+									data={'some fake parcel data here' && '3FNraEC1yo8xE8bnRzEim1vwgmpLeEdNPN'}
+									size={110}
+									framed={false}
+								/>
+							</Grid>
+							<Grid item xs={12} md={8}>
+								<Grid
+									container
+									direction="column"
+									justify="center"
+									className={classes.paymentInfoContainer}
+								>
+									<Paper variant="outlined" className={classes.paymentInfoPaper}>
+										<Grid container direction="column">
+											<Typography variant="caption">
+												To complete payment, send {fromAmount} {fromCurrency} to the below
+												address
+											</Typography>
+											<Typography variant="caption" color="secondary">
+												{/* TODO: Generate deposit address via renVM */}
+												EXAMPLEADDRESSHERE
+											</Typography>
+										</Grid>
+									</Paper>
+								</Grid>
 							</Grid>
 						</Grid>
-					</Grid>
-					<Grid container justify="center">
-						<Button variant="outlined" className={classes.paymentIndicator}>
-							AWAITING PAYMENT
-						</Button>
-					</Grid>
-				</Paper>
+						<Grid container justify="center">
+							<Button variant="outlined" className={classes.paymentIndicator}>
+								AWAITING PAYMENT
+							</Button>
+						</Grid>
+					</Paper>
+				</PaperBorder>
 			</Fade>
 		</Modal>
 	);

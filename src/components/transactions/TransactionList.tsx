@@ -1,8 +1,9 @@
-import React from 'react';
+import React, { useContext } from 'react';
 import { observer } from 'mobx-react-lite';
 import { Container, Grid, Paper, Typography } from '@material-ui/core';
 import { MainContainer, PaperContainer } from '../common/Styles';
 import { Theme, makeStyles } from '@material-ui/core/styles';
+import { StoreContext } from '../../stores/Store';
 import TransactionRow from './TransactionRow';
 
 const useStyles = makeStyles((theme: Theme) => ({
@@ -26,9 +27,17 @@ const useStyles = makeStyles((theme: Theme) => ({
 		paddingBottom: theme.spacing(1),
 		textAlign: 'center',
 	},
+	connectWalletText: {
+		textAlign: 'center',
+		paddingTop: theme.spacing(2),
+	},
 }));
 
 export const TransactionList = observer(() => {
+	const store = useContext(StoreContext);
+	const {
+		wallet: { connectedAddress },
+	} = store;
 	const classes = useStyles();
 
 	return (
@@ -41,25 +50,58 @@ export const TransactionList = observer(() => {
 								Recent Transactions
 							</Typography>
 						</Container>
-						<Grid container direction="row" className={classes.txTableTitles}>
-							<Grid item xs={3}>
-								<Typography color="textSecondary">Created</Typography>
-							</Grid>
-							<Grid item xs={3}>
-								<Typography color="textSecondary">Escrow Address</Typography>
-							</Grid>
-							<Grid item xs={3}>
-								<Typography color="textSecondary">Confirmations</Typography>
-							</Grid>
-							<Grid item xs={3}>
-								<Typography color="textSecondary">Status</Typography>
-							</Grid>
-						</Grid>
-						<TransactionRow date="6/25" address="0xABC...DEF" confirmations="2/6" status="Confirming" />
-						<TransactionRow date="6/22" address="0xDEF...ABC" confirmations="4/6" status="Confirming" />
-						<TransactionRow date="6/21" address="0x123...456" confirmations="6/6" status="Confirmed" />
-						<TransactionRow date="6/19" address="0x321...654" confirmations="6/6" status="Confirmed" />
-						<TransactionRow date="6/05" address="0xZZZ...OOO" confirmations="6/6" status="Confirmed" />
+						{connectedAddress ? (
+							<>
+								<Grid container direction="row" className={classes.txTableTitles}>
+									<Grid item xs={3}>
+										<Typography color="textSecondary">Created</Typography>
+									</Grid>
+									<Grid item xs={3}>
+										<Typography color="textSecondary">Escrow Address</Typography>
+									</Grid>
+									<Grid item xs={3}>
+										<Typography color="textSecondary">Confirmations</Typography>
+									</Grid>
+									<Grid item xs={3}>
+										<Typography color="textSecondary">Status</Typography>
+									</Grid>
+								</Grid>
+								<TransactionRow
+									date="6/25"
+									address="0xABC...DEF"
+									confirmations="2/6"
+									status="Confirming"
+								/>
+								<TransactionRow
+									date="6/22"
+									address="0xDEF...ABC"
+									confirmations="4/6"
+									status="Confirming"
+								/>
+								<TransactionRow
+									date="6/21"
+									address="0x123...456"
+									confirmations="6/6"
+									status="Confirmed"
+								/>
+								<TransactionRow
+									date="6/19"
+									address="0x321...654"
+									confirmations="6/6"
+									status="Confirmed"
+								/>
+								<TransactionRow
+									date="6/05"
+									address="0xZZZ...OOO"
+									confirmations="6/6"
+									status="Confirmed"
+								/>
+							</>
+						) : (
+							<Typography variant="h6" className={classes.connectWalletText}>
+								Please connect wallet to see past transactions.
+							</Typography>
+						)}
 					</Paper>
 				</Grid>
 			</PaperContainer>
