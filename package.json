@@ -20,7 +20,7 @@
 		"@renproject/chains": "^2.4.0",
 		"@renproject/ren": "^2.4.0",
 		"@renproject/utils": "^2.4.0",
-		"@sushiswap/sdk": "^5.0.0-canary.6",
+		"@sushiswap/sdk": "5.0.0-canary.6",
 		"@testing-library/jest-dom": "^5.11.4",
 		"@testing-library/react": "^11.1.0",
 		"@testing-library/user-event": "^12.1.10",

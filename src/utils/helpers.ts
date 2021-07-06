@@ -8,8 +8,16 @@ import {
 	SUPPORTED_TOKEN_NAMES,
 	TokenDefinition,
 } from '../config/constants/tokens';
-import { Route as SushiRoute, Fetcher, Pair, Route, Trade, TokenAmount, TradeType } from '@sushiswap/sdk';
-import { Token as SushiToken } from '@sushiswap/sdk';
+import {
+	Route as SushiRoute,
+	Token as SushiToken,
+	Fetcher,
+	Pair,
+	Route,
+	Trade,
+	TokenAmount,
+	TradeType,
+} from '@sushiswap/sdk';
 import { BaseProvider } from '@ethersproject/providers';
 import { NETWORK_LIST } from '../config/constants/network';
 import { TokenMap } from '../config/models/tokens';
