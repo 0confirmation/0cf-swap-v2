@@ -3,7 +3,7 @@ import { Button } from '@material-ui/core';
 import { makeStyles, Theme } from '@material-ui/core/styles';
 import { observer } from 'mobx-react-lite';
 import { StoreContext, Store } from '../../stores/Store';
-import { connectWallet } from '../../utils/helpers';
+import { connectWallet, shortenAddress } from '../../utils/helpers';
 
 const useStyles = makeStyles((theme: Theme) => ({
 	root: {
@@ -35,10 +35,6 @@ const useStyles = makeStyles((theme: Theme) => ({
 
 interface Props {}
 
-const shortenAddress = (address: string) => {
-	return address.slice(0, 7) + '...' + address.slice(address.length - 7, address.length);
-};
-
 export const connect = async (store: Store) => {
 	const { onboard, connect } = store.wallet;
 	if (!onboard) return;
@@ -63,7 +59,7 @@ const WalletButton: React.FC<Props> = observer(() => {
 				else store.wallet.disconnect();
 			}}
 		>
-			{!!connectedAddress ? shortenAddress(connectedAddress) : 'CONNECT'}
+			{!!connectedAddress ? shortenAddress(connectedAddress, 7) : 'CONNECT'}
 		</Button>
 	);
 });

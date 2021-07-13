@@ -8,7 +8,7 @@ export interface TransactionRowProps {
 	date: string;
 	address: string;
 	confirmations: string;
-	status: string;
+	status: number;
 }
 
 const useStyles = makeStyles((theme: Theme) => ({
@@ -47,7 +47,7 @@ export const TransactionRow = observer((props: TransactionRowProps) => {
 					<Typography>{confirmations}</Typography>
 				</Grid>
 				<Grid item xs={3}>
-					<Typography>{status}</Typography>
+					<Typography>{status >= 4 ? 'Confirmed' : 'Confirming'}</Typography>
 				</Grid>
 			</Grid>
 			<TransactionDetails {...props} open={open} handleClose={handleClose} />

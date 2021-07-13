@@ -332,3 +332,12 @@ export const connectWallet = async (onboard: API, connect: (wsOnboard: any) => v
 export const cancelInterval = (interval: NodeJS.Timeout | undefined): void => {
 	if (interval) clearInterval(interval);
 };
+
+/* Shorten provided address to make readable on screen
+ * @param address = Address you'd like to shorten
+ * @param length (optional) = length of characters to show on either side
+ * @return string formatted to provided length of digits on either side, default 5
+ */
+export const shortenAddress = (address: string, length: number = 5) => {
+	return address.slice(0, length) + '...' + address.slice(address.length - length, address.length);
+};
