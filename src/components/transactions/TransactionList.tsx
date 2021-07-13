@@ -5,6 +5,7 @@ import { MainContainer, PaperContainer } from '../common/Styles';
 import { Theme, makeStyles } from '@material-ui/core/styles';
 import { StoreContext } from '../../stores/Store';
 import TransactionRow from './TransactionRow';
+import { TRANSACTION_STATUS } from '../../config/constants/ui';
 
 const useStyles = makeStyles((theme: Theme) => ({
 	txPaper: {
@@ -70,31 +71,31 @@ export const TransactionList = observer(() => {
 									date="6/25"
 									address="0xABC...DEF"
 									confirmations="2/6"
-									status="Confirming"
+									status={TRANSACTION_STATUS['Transaction Found']}
 								/>
 								<TransactionRow
 									date="6/22"
 									address="0xDEF...ABC"
 									confirmations="4/6"
-									status="Confirming"
+									status={TRANSACTION_STATUS['Request Created']}
 								/>
 								<TransactionRow
 									date="6/21"
 									address="0x123...456"
-									confirmations="6/6"
-									status="Confirmed"
+									confirmations="5/6"
+									status={TRANSACTION_STATUS['Keeper Assigned']}
 								/>
 								<TransactionRow
 									date="6/19"
 									address="0x321...654"
-									confirmations="6/6"
-									status="Confirmed"
+									confirmations="5/6"
+									status={TRANSACTION_STATUS['Swap Complete']}
 								/>
 								<TransactionRow
 									date="6/05"
 									address="0xZZZ...OOO"
 									confirmations="6/6"
-									status="Confirmed"
+									status={TRANSACTION_STATUS.Complete}
 								/>
 							</>
 						) : (

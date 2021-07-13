@@ -6,3 +6,11 @@ export enum BUTTON_STATUS {
 	noKeeper = 'Awaiting Keeper',
 	keeperConnected = 'Review Order',
 }
+
+export enum TRANSACTION_STATUS {
+	'Transaction Found',
+	'Request Created',
+	'Keeper Assigned',
+	'Swap Complete',
+	'Complete',
+}

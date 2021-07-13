@@ -2,16 +2,20 @@ import React from 'react';
 import { Typography, Paper, Grid } from '@material-ui/core';
 import { Theme, makeStyles } from '@material-ui/core/styles';
 import { observer } from 'mobx-react-lite';
-import { Icon } from '@iconify/react';
-import btcIcon from '@iconify/icons-cryptocurrency/btc';
+import { Icon, IconifyIcon } from '@iconify/react';
+import TransactionDetailsPaperRow from './TransactionDetailsPaperRow';
 
 export interface TransactionDetailsPaperProps {
+	type: string;
 	amount: string;
 	nativeAddress?: string;
 	escrowAddress?: string;
 	finalAddress?: string;
 	fees?: string;
-	nativeTransaction?: string;
+	transaction: string;
+	transactionBlock: string;
+	icon: IconifyIcon;
+	currency: string;
 }
 
 const useStyles = makeStyles((theme: Theme) => ({
@@ -49,39 +53,47 @@ const useStyles = makeStyles((theme: Theme) => ({
 	},
 }));
 
-export const TransactionDetailsPaper = observer((props) => {
+export const TransactionDetailsPaper = observer((props: TransactionDetailsPaperProps) => {
 	const classes = useStyles();
+
+	const {
+		type,
+		amount,
+		nativeAddress,
+		escrowAddress,
+		finalAddress,
+		fees,
+		transaction,
+		transactionBlock,
+		icon,
+		currency,
+	} = props;
 
 	return (
 		<Paper variant="outlined" className={classes.transactionPaper}>
 			<Grid container direction="column" justify="flex-start" className={classes.transactionHeader}>
-				<Typography className={classes.transactionText}>FROM</Typography>
+				<Typography className={classes.transactionText}>{type === 'to' ? 'TO' : 'FROM'}</Typography>
 				<Grid container direction="row">
-					<Icon icon={btcIcon} className={classes.inputIcon} />
-					<Typography className={classes.currencyHeaderText}>BTC</Typography>
+					<Icon icon={icon} className={classes.inputIcon} />
+					<Typography className={classes.currencyHeaderText}>{currency}</Typography>
 				</Grid>
 			</Grid>
 
-			<Grid container direction="row" justify="space-between">
-				<Typography className={classes.transactionText}>Amount:</Typography>
-				<Typography className={classes.transactionText}>1.0</Typography>
-			</Grid>
-			<Grid container direction="row" justify="space-between">
-				<Typography className={classes.transactionText}>To:</Typography>
-				<Typography className={classes.transactionText}>3BPPU3...eiWPQ</Typography>
-			</Grid>
-			<Grid container direction="row" justify="space-between">
-				<Typography className={classes.transactionText}>Fees:</Typography>
-				<Typography className={classes.transactionText}>.001 BTC</Typography>
-			</Grid>
-			<Grid container direction="row" justify="space-between">
-				<Typography className={classes.transactionText}>Transaction:</Typography>
-				<Typography className={classes.transactionText}>...</Typography>
-			</Grid>
-			<Grid container direction="row" justify="space-between">
-				<Typography className={classes.transactionText}>Confirmations:</Typography>
-				<Typography className={classes.transactionText}>1/6</Typography>
-			</Grid>
+			<TransactionDetailsPaperRow description="Amount:" content={amount} />
+			<TransactionDetailsPaperRow description="Transaction:" content={transaction} />
+			{type === 'to' ? (
+				<>
+					<TransactionDetailsPaperRow description="Destination:" content={finalAddress ?? '...'} />
+					<TransactionDetailsPaperRow description="Escrow:" content={escrowAddress ?? '...'} />
+					<TransactionDetailsPaperRow description="Blocks Until Liquidation:" content={transactionBlock} />
+				</>
+			) : (
+				<>
+					<TransactionDetailsPaperRow description="To:" content={nativeAddress ?? '...'} />
+					<TransactionDetailsPaperRow description="Fees:" content={fees ? `${fees} ${currency}` : '...'} />
+					<TransactionDetailsPaperRow description="Confirmations" content={'1/6'} />
+				</>
+			)}
 		</Paper>
 	);
 });
