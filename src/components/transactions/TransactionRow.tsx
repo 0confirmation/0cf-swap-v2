@@ -3,6 +3,7 @@ import { observer } from 'mobx-react-lite';
 import { Grid, Typography } from '@material-ui/core';
 import { Theme, makeStyles } from '@material-ui/core/styles';
 import TransactionDetails from './TransactionDetails';
+import { TRANSACTION_STATUS } from '../../config/constants/ui';
 
 export interface TransactionRowProps {
 	date: string;
@@ -47,7 +48,9 @@ export const TransactionRow = observer((props: TransactionRowProps) => {
 					<Typography>{confirmations}</Typography>
 				</Grid>
 				<Grid item xs={3}>
-					<Typography>{status >= 4 ? 'Confirmed' : 'Confirming'}</Typography>
+					<Typography>
+						{Object.keys(TRANSACTION_STATUS).find((key) => TRANSACTION_STATUS[key] === status)}
+					</Typography>
 				</Grid>
 			</Grid>
 			<TransactionDetails {...props} open={open} handleClose={handleClose} />

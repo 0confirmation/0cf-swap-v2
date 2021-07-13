@@ -89,7 +89,7 @@ export const TransactionList = observer(() => {
 									date="6/19"
 									address="0x321...654"
 									confirmations="5/6"
-									status={TRANSACTION_STATUS['Swap Complete']}
+									status={TRANSACTION_STATUS['Pending Release']}
 								/>
 								<TransactionRow
 									date="6/05"

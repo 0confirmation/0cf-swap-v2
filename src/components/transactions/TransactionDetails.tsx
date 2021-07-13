@@ -158,7 +158,10 @@ export const TransactionDetails = observer((props: TransactionDetailsProps) => {
 								/>
 							</Grid>
 							<Grid container direction="row" justify="center">
-								<TransactionStatusRow complete={status >= 3} statusText="Swap Complete" />
+								<TransactionStatusRow
+									complete={status >= 3}
+									statusText="Swap Complete - Pending Confirmation"
+								/>
 							</Grid>
 							<Grid container direction="row" justify="center">
 								<TransactionStatusRow complete={status >= 4} statusText="Funds Released" />

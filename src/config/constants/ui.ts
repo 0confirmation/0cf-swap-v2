@@ -11,6 +11,6 @@ export enum TRANSACTION_STATUS {
 	'Transaction Found',
 	'Request Created',
 	'Keeper Assigned',
-	'Swap Complete',
+	'Pending Release',
 	'Complete',
 }
