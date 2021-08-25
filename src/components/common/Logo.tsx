@@ -8,6 +8,7 @@ const useStyles = makeStyles((theme: Theme) =>
 			display: 'flex',
 		},
 		titleText: {
+			color: theme.palette.text.primary,
 			fontFamily: 'Permanent Marker',
 			fontWeight: 'bold',
 		},
@@ -32,7 +33,7 @@ export default function WalletButton() {
 		<List>
 			<ListItem className={classes.noMargin}>
 				<Typography className={classes.titleText} variant="h6" noWrap>
-					Grab N' Go Sushi
+					zeroSWAP
 				</Typography>
 			</ListItem>
 			<ListItem className={classes.noMargin}>

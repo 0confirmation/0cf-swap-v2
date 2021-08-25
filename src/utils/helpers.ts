@@ -258,24 +258,6 @@ export const valueAfterFees = (
 		: numberWithCommas(finalAmount.toFixed(decimals, BigNumber.ROUND_HALF_FLOOR)).toString();
 };
 
-/* General purpose fetch that returns a JSON formatted response or null if there's an error
- * @param request = Promise to await
- * @return JSON formatted response
- */
-export const fetchData = async <T>(request: () => Promise<Response>): Promise<T | null> => {
-	try {
-		const response = await request();
-		if (!response.ok) {
-			return null;
-		}
-		// purposefully await to use try / catch
-		return await response.json();
-	} catch (err) {
-		console.log('error', err);
-		return null;
-	}
-};
-
 // ============== GENERAL HELPERS ==============
 
 /* Breaks down a provided number and inserts appropriately placed commas to make a number more human readable
@@ -340,4 +322,22 @@ export const cancelInterval = (interval: NodeJS.Timeout | undefined): void => {
  */
 export const shortenAddress = (address: string, length: number = 5) => {
 	return address.slice(0, length) + '...' + address.slice(address.length - length, address.length);
+};
+
+/* General purpose fetch that returns a JSON formatted response or null if there's an error
+ * @param request = Promise to await
+ * @return JSON formatted response
+ */
+export const fetchData = async <T>(request: () => Promise<Response>): Promise<T | null> => {
+	try {
+		const response = await request();
+		if (!response.ok) {
+			return null;
+		}
+		// purposefully await to use try / catch
+		return await response.json();
+	} catch (err) {
+		console.log('error', err);
+		return null;
+	}
 };
