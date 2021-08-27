@@ -1,6 +1,5 @@
 import type { Store } from './Store';
 import BigNumber from 'bignumber.js';
-import { NETWORK_LIST } from '../config/constants/network';
 import { action, extendObservable } from 'mobx';
 import { FeeDescription, RenFees } from '../config/models/currency';
 import { SUPPORTED_TOKEN_NAMES } from '../config/constants/tokens';
@@ -40,7 +39,7 @@ export default class FeeStore {
 		const prices = gasEndpoint ? await fetch(gasEndpoint) : null;
 
 		let gasGwei = new BigNumber(5);
-		const gasEstimate = new BigNumber(1.46e6);
+		const gasEstimate = new BigNumber(6e5);
 
 		if (prices && gasSpeed) {
 			const result = await prices.json();
@@ -101,35 +100,17 @@ export default class FeeStore {
 	 */
 	setFees = action(() => {
 		this.clearFees();
-
-		switch (this.store.wallet.network.name) {
-			case NETWORK_LIST.ETH:
-				this.getGasPrices().then((value: FeeDescription | null) => {
-					this.setGasFee(value);
-				});
-				this._getRenMintFee().then((value: RenFees) => {
-					this.setRenFee(value.mintFee, value.networkFee);
-				});
-				// Update gas price per block
-				this.gasInterval = setInterval(() => {
-					this.getGasPrices().then((value: FeeDescription | null) => {
-						this.setGasFee(value);
-					});
-				}, 1000 * 13);
-				break;
-			case NETWORK_LIST.MATIC:
-				this._getRenMintFee().then((value: RenFees) => {
-					this.setRenFee(value.mintFee, value.networkFee);
-				});
-				this.getGasPrices().then((value: FeeDescription | null) => {
-					this.setGasFee(value);
-				});
-				this.gasInterval = setInterval(() => {
-					this.getGasPrices().then((value: FeeDescription | null) => {
-						this.setGasFee(value);
-					});
-				}, 1000 * 13);
-		}
+		this.getGasPrices().then((value: FeeDescription | null) => {
+			this.setGasFee(value);
+		});
+		this._getRenMintFee().then((value: RenFees) => {
+			this.setRenFee(value.mintFee, value.networkFee);
+		});
+		this.gasInterval = setInterval(() => {
+			this.getGasPrices().then((value: FeeDescription | null) => {
+				this.setGasFee(value);
+			});
+		}, 1000 * 13);
 	});
 
 	getAllFees = (store: Store, amount: BigNumber, currency: SUPPORTED_TOKEN_NAMES): BigNumber | undefined => {

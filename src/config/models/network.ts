@@ -218,8 +218,8 @@ export class MaticNetwork implements Network {
 			address: '0x1BFD67037B42Cf73acF2047067bd4F2C47D9BfD6',
 			decimals: 8,
 			icon: btcIcon as unknown as IconifyIcon,
-			inRoute: [this.tokenList.wBTC, this.tokenList.Ethereum],
-			outRoute: [this.tokenList.Ethereum, this.tokenList.wBTC],
+			inRoute: [],
+			outRoute: [],
 		},
 		{
 			name: SUPPORTED_TOKEN_NAMES.ETH,
@@ -236,7 +236,7 @@ export class MaticNetwork implements Network {
 		return result;
 	}, {});
 	public baseCurrency = this.tokens[0];
-	public gasEndpoint = 'https://gasstation-mainnet.this.network';
+	public gasEndpoint = 'https://gasstation-mainnet.matic.network';
 	public gasSpeed = 'fastest';
 	public gasMultiplier = 1e9;
 	public renNetwork = Polygon;
