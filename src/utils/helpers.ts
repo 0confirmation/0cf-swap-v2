@@ -1,27 +1,10 @@
 import type { PriceHistory, PriceSummary } from '../config/models/currency';
 import BigNumber from 'bignumber.js';
 import type { Store } from '../stores/Store';
-import {
-	BSC_TOKENS,
-	ETH_TOKENS,
-	MATIC_TOKENS,
-	SUPPORTED_TOKEN_NAMES,
-	TokenDefinition,
-} from '../config/constants/tokens';
-import {
-	Route as SushiRoute,
-	Token as SushiToken,
-	Fetcher,
-	Pair,
-	Route,
-	Trade,
-	TokenAmount,
-	TradeType,
-} from '@sushiswap/sdk';
-import { BaseProvider } from '@ethersproject/providers';
-import { NETWORK_LIST } from '../config/constants/network';
-import { TokenMap } from '../config/models/tokens';
+import { SUPPORTED_TOKEN_NAMES } from '../config/constants/tokens';
+import { ethers } from 'ethers';
 import { API } from 'bnc-onboard/dist/src/interfaces';
+import { TradeType } from '../config/models/sushi';
 
 // ============== BTC HELPERS ==============
 
@@ -70,99 +53,11 @@ export const fetchBtcConfirmationTime = async (): Promise<string> => {
 
 // ============== SUSHI HELPERS ==============
 
-/* Returns a list of token definitions based on the input network
- * @param network (optional) = Name of network to return tokens for, default Ethereum
- * @return token definitions for the provided network, default ETH
- */
-export const getTokens = (network?: NETWORK_LIST): TokenDefinition[] => {
-	switch (network) {
-		case NETWORK_LIST.BSC:
-			return BSC_TOKENS;
-		case NETWORK_LIST.MATIC:
-			return MATIC_TOKENS;
-		default:
-			return ETH_TOKENS;
-	}
-};
-
-/* Returns a Sushiswap formatted token based on a token definition name
- * @param token = Token name on the supported token list
- * @return Token format to match Sushiswap SDK
- */
-export const getSushiToken = (
-	tokenName: string,
-	tokenMap: TokenMap | null | undefined,
-	networkId: number,
-): SushiToken | undefined => {
-	const token = tokenMap ? tokenMap[tokenName] : null;
-	return token ? new SushiToken(networkId, token.address, token.decimals, token.symbol, token.name) : undefined;
-};
-
-/* Get the pair data to create routes and return the sushiswap route data
- * from the sushi SDK.
- * @param store = Store data to pull network specific information
- * @param fromName = Name of tokenA in the supported token list
- * @param toName = Name of tokenB in the supported token list
- * @param currency = token name we're denominating the trade in
- * @return route from Sushiswap SDK
- */
-export const fetchRoute = async (
-	store: Store,
-	fromName: SUPPORTED_TOKEN_NAMES,
-	toName: SUPPORTED_TOKEN_NAMES,
-): Promise<Route | undefined> => {
-	const {
-		currency: { tokenMap },
-		wallet: {
-			connectedAddress,
-			network: { networkId },
-		},
-	} = store;
-
-	const currencyToken = getSushiToken(fromName, tokenMap, networkId);
-
-	if (!currencyToken || !connectedAddress) return undefined;
-
-	// If we're going from token -> eth, we only need one pair
-	if (toName === SUPPORTED_TOKEN_NAMES.ETH) {
-		const ethPair = await fetchPair(store, fromName, toName);
-		return ethPair ? new SushiRoute([ethPair], currencyToken) : undefined;
-	}
-
-	const fromEthPair = await fetchPair(store, fromName, SUPPORTED_TOKEN_NAMES.ETH);
-	const ethWantPair = await fetchPair(store, SUPPORTED_TOKEN_NAMES.ETH, toName);
-	return fromEthPair && ethWantPair ? new SushiRoute([fromEthPair, ethWantPair], currencyToken) : undefined;
-};
-
-/* Get sushi token instances of token names and fetch the pair data from
- * the sushiswap SDK.
- * @param store = Store data to pull network specific information
- * @param fromName = Name of tokenA in the supported token list
- * @param toName = Name of tokenB in the supported token list
- * @return pair definition from the Sushiswap SDK
- */
-export const fetchPair = async (
-	store: Store,
-	fromName: SUPPORTED_TOKEN_NAMES,
-	toName: SUPPORTED_TOKEN_NAMES,
-): Promise<Pair | void> => {
-	const {
-		currency: { tokenMap },
-		wallet: { connectedAddress, provider, network },
-	} = store;
-
-	const fromToken = getSushiToken(fromName, tokenMap, network.networkId);
-	const toToken = getSushiToken(toName, tokenMap, network.networkId);
-
-	if (!fromToken || !toToken || !connectedAddress) return undefined;
-
-	return Fetcher.fetchPairData(fromToken, toToken, provider as BaseProvider);
-};
-
-/* Fetches the pair data from sushiswap and calculates current pricing for all supported pairs
+/* Fetches the prices for all supported tokens and returns an object of the current market prices
+ * for each token
  * NOTE: this pricing is not execution price and should only be used for displaying current price.
  * @param store = store instance to get network specific data and sushi tokens
- * @return current market prices of tokens vs BTC on Sushiswap
+ * @return keyed object with token name -> token price pairs
  */
 export const fetchPrices = async (store: Store): Promise<PriceSummary | null> => {
 	let prices = {};
@@ -173,65 +68,79 @@ export const fetchPrices = async (store: Store): Promise<PriceSummary | null> =>
 		return null;
 	}
 	const {
-		currency: { tokenMap },
 		wallet: {
-			network: { networkId },
+			provider,
+			network: { tokens, sushiRouter, sushiRouterAbi },
 		},
 	} = store;
 
-	const btc = getSushiToken(SUPPORTED_TOKEN_NAMES.WBTC, tokenMap, networkId);
-	if (!btc) return null;
+	if (!provider) return null;
 
-	for (const token in SUPPORTED_TOKEN_NAMES) {
-		const tokenName = SUPPORTED_TOKEN_NAMES[token];
-		const route = await fetchRoute(store, SUPPORTED_TOKEN_NAMES.WBTC, tokenName);
-		if (!route) break;
-		prices[tokenName] = new BigNumber(route.midPrice.toFixed(2));
-	}
-
+	await Promise.all(
+		tokens.map(async (token) => {
+			const route = token.inRoute;
+			const router = new ethers.Contract(sushiRouter, sushiRouterAbi, provider);
+			if (route.length < 2) {
+				prices[token.name] = new BigNumber('1.00');
+				return;
+			}
+			const routerOutput = await router.getAmountsOut('100000000', route);
+			prices[token.name] = new BigNumber(
+				new BigNumber(routerOutput[routerOutput.length - 1]['_hex']).div(10 ** token.decimals).toFixed(2),
+			);
+		}),
+	);
 	return prices;
 };
 
-/* Get the correct route for a sushi swap and return the trade object from the SDK
+/* Get the trade data for a provided pair based on input or output trading type
  * @param store = store holding network data
  * @param fromName = name of token we're swapping from
  * @param tokenName = name of token we're swapping to
  * @param amount = BigNumber amount we're swapping from in from token
- * @return trade definition from the Sushiswap SDK
+ * @return average execution price of the trade
  */
 export const fetchTrade = async (
 	store: Store,
-	fromName: SUPPORTED_TOKEN_NAMES,
 	toName: SUPPORTED_TOKEN_NAMES,
+	fromName: SUPPORTED_TOKEN_NAMES = SUPPORTED_TOKEN_NAMES.WBTC,
 	amount: BigNumber,
 	type: TradeType,
-): Promise<Trade | undefined> => {
+): Promise<BigNumber | undefined> => {
 	const {
-		currency: { tokenMap },
 		wallet: {
-			network: { networkId },
+			provider,
+			network: { tokenMap, sushiRouter, sushiRouterAbi },
 		},
 	} = store;
 
-	const inputToken =
-		type === TradeType.EXACT_INPUT
-			? getSushiToken(fromName, tokenMap, networkId)
-			: getSushiToken(toName, tokenMap, networkId);
+	const inputToken = tokenMap[toName];
+	const outputToken = tokenMap[fromName];
+	const router = new ethers.Contract(sushiRouter, sushiRouterAbi, provider);
 
-	const route = await fetchRoute(store, fromName, toName);
-	if (!inputToken || !route) return undefined;
-	const trade = new Trade(
-		route,
-		new TokenAmount(
-			inputToken,
+	let price;
+	if (type === TradeType.Out) {
+		const routerOutput = await router.getAmountsOut(
 			amount
 				.multipliedBy(10 ** inputToken.decimals)
 				.toFixed(0)
 				.toString(),
-		),
-		type,
-	);
-	return trade;
+			outputToken.inRoute,
+		);
+		price = new BigNumber(
+			new BigNumber(routerOutput[routerOutput.length - 1]['_hex']).div(10 ** outputToken.decimals).toFixed(2),
+		);
+	} else {
+		const routerOutput = await router.getAmountsIn(
+			amount
+				.multipliedBy(10 ** outputToken.decimals)
+				.toFixed(0)
+				.toString(),
+			outputToken.inRoute,
+		);
+		price = new BigNumber(new BigNumber(routerOutput[0]['_hex']).div(10 ** inputToken.decimals).toFixed(2));
+	}
+	return price;
 };
 
 // ============== ZERO HELPERS ==============
@@ -250,8 +159,11 @@ export const valueAfterFees = (
 	decimals = 8,
 	noCommas = false,
 ): string | null => {
+	console.log('test:', currency, amount.toString());
 	const fees = store.fees.getAllFees(store, amount, currency);
+	console.log('fees:', fees?.toString());
 	const finalAmount = amount.minus(fees ?? new BigNumber(0));
+	console.log(finalAmount.toString());
 
 	return noCommas
 		? finalAmount.toFixed(decimals, BigNumber.ROUND_HALF_FLOOR).toString()

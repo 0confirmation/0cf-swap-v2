@@ -3,7 +3,6 @@ import { Select, MenuItem } from '@material-ui/core';
 import { StoreContext } from '../../stores/Store';
 import { SUPPORTED_TOKEN_NAMES, TokenDefinition } from '../../config/constants/tokens';
 import { SwapDisplay } from './SwapDisplay';
-import { getTokens } from '../../utils/helpers';
 import { Theme, makeStyles } from '@material-ui/core/styles';
 
 export interface SelectionProps {
@@ -29,7 +28,7 @@ const SwapToSelection = (props: SelectionProps): JSX.Element => {
 		/* eslint-disable */
 	}, [coin]);
 
-	const selections = getTokens(store.wallet.network.name);
+	const selections = store.wallet.network.tokens;
 	const handleChange = (event: React.ChangeEvent<{ value: unknown }>) => {
 		setCoin(event.target.value as SUPPORTED_TOKEN_NAMES);
 	};

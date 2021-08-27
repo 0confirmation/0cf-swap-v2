@@ -3,7 +3,7 @@ import BigNumber from 'bignumber.js';
 import { NETWORK_LIST } from '../config/constants/network';
 import { action, extendObservable } from 'mobx';
 import { FeeDescription, RenFees } from '../config/models/currency';
-import { BASE_CURRENCY, SUPPORTED_TOKEN_NAMES } from '../config/constants/tokens';
+import { SUPPORTED_TOKEN_NAMES } from '../config/constants/tokens';
 import { cancelInterval } from '../utils/helpers';
 import { Bitcoin } from '@renproject/chains-bitcoin';
 
@@ -32,12 +32,11 @@ export default class FeeStore {
 	/* ETH gas prices based on https://gasnow.org/
 	 */
 	private async getGasPrices(): Promise<FeeDescription | null> {
-		const networkName = this.store.wallet.network.name;
 		const gasEndpoint = this.store.wallet.network.gasEndpoint;
 		const gasSpeed = this.store.wallet.network.gasSpeed;
 		const gasMultiplier = this.store.wallet.network.gasMultiplier;
 
-		const baseCurrency = BASE_CURRENCY[networkName];
+		const baseCurrency = this.store.wallet.network.baseCurrency;
 		const prices = gasEndpoint ? await fetch(gasEndpoint) : null;
 
 		let gasGwei = new BigNumber(5);
