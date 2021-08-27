@@ -210,12 +210,12 @@ export const coerceInputToNumber = (newValue: string, oldValue: string) => {
  * @param onboard = instance of the onboard.js API
  * @param connect = connect function from the wallet store
  */
-export const connectWallet = async (onboard: API, connect: (wsOnboard: any) => void): Promise<void> => {
+export const connectWallet = async (onboard: API, connect: (wsOnboard: any) => Promise<void>): Promise<void> => {
 	const walletSelected = await onboard.walletSelect();
 	if (walletSelected && onboard.getState().network) {
 		const readyToTransact = await onboard.walletCheck();
 		if (readyToTransact) {
-			connect(onboard);
+			await connect(onboard);
 		}
 	}
 };
