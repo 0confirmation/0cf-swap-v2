@@ -75,7 +75,7 @@ export default class WalletStore {
 				return;
 			}
 			if (walletSelected && walletReady) {
-				this.connect(this.onboard);
+				await this.connect(this.onboard);
 			} else {
 				this.walletReset();
 			}
@@ -103,10 +103,10 @@ export default class WalletStore {
 		return !!this.connectedAddress || !!window.localStorage.getItem('selectedWallet');
 	});
 
-	connect = action((wsOnboard: API) => {
+	connect = action(async (wsOnboard: API) => {
 		const walletState = wsOnboard.getState();
 		const provider = new ethers.providers.Web3Provider(walletState.wallet.provider);
-		if (this.checkSupportedNetwork(provider)) {
+		if (await this.checkSupportedNetwork(provider)) {
 			this.onboard = wsOnboard;
 			this.provider = provider;
 			this.setAddress(wsOnboard.getState().address);
