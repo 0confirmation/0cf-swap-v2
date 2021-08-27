@@ -11,7 +11,7 @@ import FeeDisplay from './FeeDisplay';
 import StatsDisplay from './StatsDisplay';
 import { BigNumber } from 'bignumber.js';
 import { fetchTrade, numberWithCommas, valueAfterFees } from '../../utils/helpers';
-import { TradeType } from '@sushiswap/sdk';
+import { TradeType } from '../../config/models/sushi';
 import { GasReserve } from './GasReserve';
 import { MainContainer, PaperContainer } from '../common/Styles';
 
@@ -23,23 +23,6 @@ const useStyles = makeStyles((theme: Theme) => ({
 		paddingTop: theme.spacing(6),
 	},
 }));
-
-/*
- * Retrieves the balance of the liquidity pool from the Zero protocol
- * @param zero = instance of the Zero SDK class
- */
-// const getLiquidity = async (zero: any) => {
-// 	if (!zero) return;
-// 	const { makeManagerClass } = require('@0confirmation/eth-manager');
-// 	const ERC20 = makeManagerClass(require('@0confirmation/sol/build/DAI')); // will make an ethers.js wrapper compatible with DAI, which is a mock token that exports the ERC20 ABI
-// 	const environments = require('@0confirmation/sdk/environments');
-// 	const mainnet = environments.getAddresses('mainnet');
-// 	const renbtc = new ERC20(mainnet.renbtc, zero.getProvider().asEthers());
-
-// 	const zeroBTC = await zero.getLiquidityTokenFor(mainnet.renbtc);
-// 	const liquidityPoolRenBTCHoldings = await renbtc.balanceOf(zeroBTC.address);
-// 	console.log(String(liquidityPoolRenBTCHoldings));
-// };
 
 export const Swap = observer(() => {
 	const classes = useStyles();
@@ -101,20 +84,16 @@ export const Swap = observer(() => {
 		await loadPrices();
 
 		const bnAmount = new BigNumber(amount);
+		// TODO: Make this dynamic based on input token
 		const fees = new BigNumber(getAllFees(store, bnAmount, selectedCoin) ?? 0);
 		const tradeAmount = bnAmount.plus(fees);
 
-		const trade = await fetchTrade(
-			store,
-			SUPPORTED_TOKEN_NAMES.WBTC,
-			selectedCoin,
-			tradeAmount,
-			TradeType.EXACT_OUTPUT,
-		);
+		// TODO: Make this dynamic based on input token
+		const trade = await fetchTrade(store, SUPPORTED_TOKEN_NAMES.WBTC, selectedCoin, tradeAmount, TradeType.In);
 
 		if (trade) {
-			const value = tradeAmount.dividedBy(new BigNumber(trade.executionPrice.toFixed(6)));
-			setPriceImpact(trade.priceImpact.toSignificant(2));
+			const value = new BigNumber(trade.toFixed(6));
+			setPriceImpact('0');
 			value && value.gt(0)
 				? setFromAmount(numberWithCommas(value.toFixed(4, BigNumber.ROUND_HALF_FLOOR)))
 				: setFromAmount('0');
@@ -128,13 +107,13 @@ export const Swap = observer(() => {
 		await loadPrices();
 		const bnAmount = new BigNumber(amount);
 		const trade = bnAmount.gt(0)
-			? await fetchTrade(store, SUPPORTED_TOKEN_NAMES.WBTC, selectedCoin, bnAmount, TradeType.EXACT_INPUT)
+			? await fetchTrade(store, SUPPORTED_TOKEN_NAMES.WBTC, selectedCoin, bnAmount, TradeType.Out)
 			: undefined;
 
 		if (trade) {
-			const executionAmount = bnAmount.multipliedBy(new BigNumber(trade.executionPrice.toFixed(6)));
+			const executionAmount = new BigNumber(trade.toFixed(6));
 			const value = valueAfterFees(store, executionAmount, selectedCoin, 4);
-			setPriceImpact(trade.priceImpact.toSignificant(2));
+			setPriceImpact('0');
 			value && parseFloat(value) > 0 ? setToAmount(value) : setToAmount('0');
 		} else if (updateSide === 'to') {
 			setPriceImpact('0');
