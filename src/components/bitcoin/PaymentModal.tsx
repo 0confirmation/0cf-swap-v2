@@ -1,10 +1,11 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Modal, Typography, Paper, Grid, Backdrop, Fade, Button } from '@material-ui/core';
 import { Theme, makeStyles } from '@material-ui/core/styles';
 import { observer } from 'mobx-react-lite';
 import { PaymentModalProps } from '../swap/PaymentButton';
 import { PaperBorder } from '../StyledComponents';
 import QRCode from '../qrScanner/index';
+const ZeroProtocol = require('zero-protocol');
 
 const useStyles = makeStyles((theme: Theme) => ({
 	modal: {
@@ -52,6 +53,16 @@ const useStyles = makeStyles((theme: Theme) => ({
 export const PaymentModal = observer((props: PaymentModalProps): JSX.Element => {
 	const classes = useStyles();
 	const { open, handleClose, fromAmount, toAmount, priceImpact, toCurrency, fromCurrency } = props;
+
+	useEffect(() => {
+		async function getZeroConnection() {
+			const zero_connection = await ZeroProtocol.createZeroConnection('/dns4/stomp.dynv6.net/tcp/443/wss/p2p-webrtc-star/');
+			console.log("zero_connection: ", zero_connection)
+		}
+		getZeroConnection();
+	})
+
+
 	return (
 		<Modal
 			className={classes.modal}
