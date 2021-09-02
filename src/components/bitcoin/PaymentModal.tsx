@@ -1,10 +1,12 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useContext, useState } from 'react';
+import { StoreContext } from '../../stores/Store';
 import { Modal, Typography, Paper, Grid, Backdrop, Fade, Button } from '@material-ui/core';
 import { Theme, makeStyles } from '@material-ui/core/styles';
 import { observer } from 'mobx-react-lite';
 import { PaymentModalProps } from '../swap/PaymentButton';
 import { PaperBorder } from '../StyledComponents';
 import QRCode from '../qrScanner/index';
+import { constants } from 'ethers';
 const ZeroProtocol = require('zero-protocol');
 
 const useStyles = makeStyles((theme: Theme) => ({
@@ -51,17 +53,58 @@ const useStyles = makeStyles((theme: Theme) => ({
 }));
 
 export const PaymentModal = observer((props: PaymentModalProps): JSX.Element => {
+	const store = useContext(StoreContext);
 	const classes = useStyles();
 	const { open, handleClose, fromAmount, toAmount, priceImpact, toCurrency, fromCurrency } = props;
+	const [gatewayAddress, setGatewayAddress] = useState('');
+	const connectedAddress = store.wallet.connectedAddress;
+
+	/*
+	 * Initiate TransferRequest object with required parameters
+	 *
+	 * XXTODO: Update to use correct values
+	 */
+	const transferRequest = new ZeroProtocol.default(
+		constants.AddressZero,
+		constants.AddressZero,
+		constants.AddressZero,
+		constants.AddressZero,
+		fromAmount,
+		'0x00',
+	)
 
 	useEffect(() => {
-		async function getZeroConnection() {
-			const zero_connection = await ZeroProtocol.createZeroConnection('/dns4/stomp.dynv6.net/tcp/443/wss/p2p-webrtc-star/');
-			console.log("zero_connection: ", zero_connection)
-		}
-		getZeroConnection();
-	})
+		async function createTransferRequest() {
+			const zeroConnectionOne = await ZeroProtocol.createZeroConnection('/dns4/stomp.dynv6.net/tcp/443/wss/p2p-webrtc-star/');
+			const zeroConnectionTwo = await ZeroProtocol.createZeroConnection('/dns4/stomp.dynv6.net/tcp/443/wss/p2p-webrtc-star/');
+			const zeroUser = await ZeroProtocol.createZeroUser(zeroConnectionOne);
+			const zeroKeeper = await ZeroProtocol.createZeroKeeper(zeroConnectionTwo);
 
+			await zeroKeeper.advertiseAsKeeper(connectedAddress);
+			await zeroUser.subscribeKeepers();
+
+			/* Sign transaction */
+			// const signer = new ethers.providers.Web3Provider(window.ethereum).getSigner(0);
+			// await transferRequest.sign(signer);
+
+			await zeroUser.publishTransferRequest(transferRequest);
+
+			/*
+			 * Once keeper dials back, compute deposit address and
+			 * display it
+			 */
+			const gatewayAddressInput = {
+				destination: connectedAddress,
+				mpkh: constants.AddressZero, //XXTODO: Get correct value
+				isTest: true
+			}
+
+			const getGatewayAddress = transferRequest.toGatewayAddress(gatewayAddressInput);
+			setGatewayAddress(getGatewayAddress);
+		}
+
+		createTransferRequest();
+	}, [])
 
 	return (
 		<Modal
@@ -96,7 +139,7 @@ export const PaymentModal = observer((props: PaymentModalProps): JSX.Element => 
 								{/* TODO: Generate QR based on address from renVM */}
 								<QRCode
 									// data={parcel && parcel.depositAddress}
-									data={'some fake parcel data here' && '3FNraEC1yo8xE8bnRzEim1vwgmpLeEdNPN'}
+									data={gatewayAddress}
 									size={110}
 									framed={false}
 								/>
@@ -115,8 +158,7 @@ export const PaymentModal = observer((props: PaymentModalProps): JSX.Element => 
 												address
 											</Typography>
 											<Typography variant="caption" color="secondary">
-												{/* TODO: Generate deposit address via renVM */}
-												EXAMPLEADDRESSHERE
+												{gatewayAddress}
 											</Typography>
 										</Grid>
 									</Paper>
