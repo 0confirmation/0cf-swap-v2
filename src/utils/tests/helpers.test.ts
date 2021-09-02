@@ -1,7 +1,5 @@
 import * as helpers from '../helpers';
 import BigNumber from 'bignumber.js';
-import { NETWORK_LIST } from '../../config/constants/network';
-import { BSC_TOKENS, ETH_TOKENS } from '../../config/constants/tokens';
 
 const getMockFetch = (mockData: any) => {
 	return jest.fn().mockImplementation(() => {
@@ -179,17 +177,6 @@ describe('fetchBtcBlockHeight', () => {
 		const expected = 687073;
 		expect(fetch).toBeCalledTimes(1);
 		expect(confTime).toBe(expected);
-	});
-});
-
-describe('getTokens', () => {
-	test.each([
-		[NETWORK_LIST.ETH, ETH_TOKENS],
-		[NETWORK_LIST.BSC, BSC_TOKENS],
-		['btc', ETH_TOKENS],
-		[undefined, ETH_TOKENS],
-	])('getTokens(%s) returns %s', (network, expected) => {
-		expect(helpers.getTokens(network as NETWORK_LIST)).toEqual(expected);
 	});
 });
 

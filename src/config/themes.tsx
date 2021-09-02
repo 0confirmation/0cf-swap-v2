@@ -23,10 +23,12 @@ export const sushiTheme = createMuiTheme({
 	palette: {
 		type: 'dark',
 		primary: {
-			main: '#2F82B1',
+			// main: '#2F82B1',
+			main: '#40c689',
 		},
 		secondary: {
-			main: '#FA52A0',
+			// main: '#FA52A0',
+			main: '#40C0C6',
 		},
 		text: {
 			primary: '#FFFFFF',
