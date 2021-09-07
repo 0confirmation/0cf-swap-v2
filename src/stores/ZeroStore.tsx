@@ -1,55 +1,59 @@
-import { action, extendObservable } from 'mobx';
+import { extendObservable } from 'mobx';
 import type { Store } from './Store';
-import type Zero from '@0confirmation/sdk';
 import type { KeeperList } from '../config/models/zero';
-import { cancelInterval } from '../utils/helpers';
+import { LIB_P2P_URI } from '../config/constants/zero';
+import { constants } from 'ethers';
+import TransferRequest, { createZeroConnection, createZeroKeeper, createZeroUser } from 'zero-protocol';
 
 export default class ZeroStore {
 	private readonly store!: Store;
-	public zero: typeof Zero | undefined;
 	public keepers: KeeperList | undefined;
-	private emitterInterval: NodeJS.Timeout | undefined;
 
 	constructor(store: Store) {
 		this.store = store;
 		this.keepers = undefined;
-		this.zero = undefined;
-		this.emitterInterval = undefined;
 
 		extendObservable(this, {
 			keepers: undefined,
-			zero: undefined,
 		});
 	}
-
-	private setKeepers = action((keeperList: KeeperList): void => {
-		this.keepers = keeperList;
-	});
 
 	/* Utilizes the user's provider to connect to the
 	 * Zero network.
 	 */
-	public setZero = action(async (provider: any) => {
-		if (!provider) {
-			this.zero = undefined;
-			cancelInterval(this.emitterInterval);
-			return;
-		}
-		const Zero = require('@0confirmation/sdk');
-		this.zero = new Zero(provider, 'mainnet');
-		await this.zero.initializeDriver();
-		const emitter = this.zero.createKeeperEmitter();
-		emitter.poll();
-		emitter.on('keeper', (address: string) => {
-			console.log('keeper', address);
-			this.setKeepers({
-				[address]: true,
-				...this.keepers,
-			});
-		});
-		this.emitterInterval = setInterval(() => {
-			this.setKeepers({});
-			emitter.poll();
-		}, 120e3);
-	});
+	public createTransferRequest = async (address: string, fromAmount: string): Promise<string> => {
+		const transferRequest = new TransferRequest(
+			constants.AddressZero,
+			constants.AddressZero,
+			constants.AddressZero,
+			constants.AddressZero,
+			fromAmount,
+			'0x00',
+		);
+		const zeroConnectionOne = await createZeroConnection(LIB_P2P_URI);
+		const zeroConnectionTwo = await createZeroConnection(LIB_P2P_URI);
+		const zeroUser = createZeroUser(zeroConnectionOne);
+		const zeroKeeper = createZeroKeeper(zeroConnectionTwo);
+
+		await zeroKeeper.advertiseAsKeeper(address);
+		await zeroUser.subscribeKeepers();
+
+		/* Sign transaction */
+		// const signer = new ethers.providers.Web3Provider(window.ethereum).getSigner(0);
+		// await transferRequest.sign(signer);
+
+		await zeroUser.publishTransferRequest(transferRequest);
+
+		/*
+		 * Once keeper dials back, compute deposit address and
+		 * display it
+		 */
+		const gatewayAddressInput = {
+			destination: address,
+			mpkh: constants.AddressZero, //XXTODO: Get correct value
+			isTest: true,
+		};
+
+		return transferRequest.toGatewayAddress(gatewayAddressInput);
+	};
 }

@@ -110,7 +110,6 @@ export default class WalletStore {
 			this.onboard = wsOnboard;
 			this.provider = provider;
 			this.setAddress(wsOnboard.getState().address);
-			this.store.zero.setZero(provider);
 			Promise.all([this.store.storeRefresh()]);
 		} else {
 			this.walletReset();
@@ -120,7 +119,6 @@ export default class WalletStore {
 	disconnect = action(() => {
 		this.setAddress('');
 		this.store.fees.clearFees();
-		this.store.zero.setZero(undefined);
 		this.onboard.walletReset();
 		this.provider = undefined;
 		if (this.isCached()) window.localStorage.removeItem('selectedWallet');
