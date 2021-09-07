@@ -3,10 +3,6 @@
 	"version": "0.1.0",
 	"private": true,
 	"dependencies": {
-		"@0confirmation/eth-manager": "^0.2.7",
-		"@0confirmation/providers": "^1.0.1",
-		"@0confirmation/sdk": "^1.0.1",
-		"@0confirmation/sol": "^1.0.1",
 		"@ethersproject/address": "^5.2.0",
 		"@ethersproject/contracts": "^5.2.0",
 		"@ethersproject/providers": "^5.2.0",

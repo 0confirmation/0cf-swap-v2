@@ -6,9 +6,6 @@ import { observer } from 'mobx-react-lite';
 import { PaymentModalProps } from '../swap/PaymentButton';
 import { PaperBorder } from '../StyledComponents';
 import QRCode from '../qrScanner/index';
-import { constants } from 'ethers';
-import { TransferRequest, createZeroConnection, createZeroKeeper, createZeroUser } from 'zero-protocol';
-import { LIB_P2P_URI } from '../../config/constants/zero';
 
 const useStyles = makeStyles((theme: Theme) => ({
 	modal: {
@@ -65,46 +62,13 @@ export const PaymentModal = observer((props: PaymentModalProps): JSX.Element => 
 	 *
 	 * XXTODO: Update to use correct values
 	 */
-	const transferRequest = new TransferRequest(
-		constants.AddressZero,
-		constants.AddressZero,
-		constants.AddressZero,
-		constants.AddressZero,
-		fromAmount,
-		'0x00',
-	);
 
 	useEffect(() => {
-		async function createTransferRequest() {
-			const zeroConnectionOne = await createZeroConnection(LIB_P2P_URI);
-			const zeroConnectionTwo = await createZeroConnection(LIB_P2P_URI);
-			const zeroUser = createZeroUser(zeroConnectionOne);
-			const zeroKeeper = createZeroKeeper(zeroConnectionTwo);
-
-			await zeroKeeper.advertiseAsKeeper(connectedAddress);
-			await zeroUser.subscribeKeepers();
-
-			/* Sign transaction */
-			// const signer = new ethers.providers.Web3Provider(window.ethereum).getSigner(0);
-			// await transferRequest.sign(signer);
-
-			await zeroUser.publishTransferRequest(transferRequest);
-
-			/*
-			 * Once keeper dials back, compute deposit address and
-			 * display it
-			 */
-			const gatewayAddressInput = {
-				destination: connectedAddress,
-				mpkh: constants.AddressZero, //XXTODO: Get correct value
-				isTest: true,
-			};
-
-			const getGatewayAddress = transferRequest.toGatewayAddress(gatewayAddressInput);
-			setGatewayAddress(getGatewayAddress);
+		async function getGatewayAddress() {
+			const newGatewayAddress = await store.zero.createTransferRequest(connectedAddress, fromAmount);
+			setGatewayAddress(newGatewayAddress);
 		}
-
-		createTransferRequest();
+		getGatewayAddress();
 	});
 
 	return (
