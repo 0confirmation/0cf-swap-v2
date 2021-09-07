@@ -67,7 +67,7 @@ export const BitcoinPayment = observer((props: PaymentModalProps): JSX.Element =
 			<Button className={classes.submitButton} onClick={buttonFunction} variant="contained">
 				{buttonStatus()}
 			</Button>
-			<PaymentModal open={open} handleClose={handleClose} {...props} />
+			{open && <PaymentModal open={open} handleClose={handleClose} {...props} />}
 		</>
 	);
 });

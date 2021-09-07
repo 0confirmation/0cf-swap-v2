@@ -1,4 +1,5 @@
-import React from 'react';
+import React, { useEffect, useContext, useState } from 'react';
+import { StoreContext } from '../../stores/Store';
 import { Modal, Typography, Paper, Grid, Backdrop, Fade, Button } from '@material-ui/core';
 import { Theme, makeStyles } from '@material-ui/core/styles';
 import { observer } from 'mobx-react-lite';
@@ -50,8 +51,25 @@ const useStyles = makeStyles((theme: Theme) => ({
 }));
 
 export const PaymentModal = observer((props: PaymentModalProps): JSX.Element => {
+	const store = useContext(StoreContext);
 	const classes = useStyles();
 	const { open, handleClose, fromAmount, toAmount, priceImpact, toCurrency, fromCurrency } = props;
+	const [gatewayAddress, setGatewayAddress] = useState('');
+	const connectedAddress = store.wallet.connectedAddress;
+
+	/*
+	 * Initiate TransferRequest object with required parameters
+	 *
+	 * XXTODO: Update to use correct values
+	 */
+	useEffect(() => {
+		async function getGatewayAddress() {
+			const newGatewayAddress = await store.zero.createTransferRequest(connectedAddress, fromAmount);
+			setGatewayAddress(newGatewayAddress);
+		}
+		getGatewayAddress();
+	}, [connectedAddress, fromAmount, store.zero]);
+
 	return (
 		<Modal
 			className={classes.modal}
@@ -85,7 +103,7 @@ export const PaymentModal = observer((props: PaymentModalProps): JSX.Element => 
 								{/* TODO: Generate QR based on address from renVM */}
 								<QRCode
 									// data={parcel && parcel.depositAddress}
-									data={'some fake parcel data here' && '3FNraEC1yo8xE8bnRzEim1vwgmpLeEdNPN'}
+									data={gatewayAddress}
 									size={110}
 									framed={false}
 								/>
@@ -104,8 +122,7 @@ export const PaymentModal = observer((props: PaymentModalProps): JSX.Element => 
 												address
 											</Typography>
 											<Typography variant="caption" color="secondary">
-												{/* TODO: Generate deposit address via renVM */}
-												EXAMPLEADDRESSHERE
+												{gatewayAddress}
 											</Typography>
 										</Grid>
 									</Paper>
