@@ -7,6 +7,7 @@ import { PaymentModalProps } from '../swap/PaymentButton';
 import { PaperBorder } from '../StyledComponents';
 import QRCode from '../qrScanner/index';
 
+
 const useStyles = makeStyles((theme: Theme) => ({
 	modal: {
 		display: 'flex',
@@ -62,7 +63,6 @@ export const PaymentModal = observer((props: PaymentModalProps): JSX.Element => 
 	 *
 	 * XXTODO: Update to use correct values
 	 */
-
 	useEffect(() => {
 		async function getGatewayAddress() {
 			const newGatewayAddress = await store.zero.createTransferRequest(connectedAddress, fromAmount);
