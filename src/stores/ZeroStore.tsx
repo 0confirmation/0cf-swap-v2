@@ -30,19 +30,20 @@ export default class ZeroStore {
 			fromAmount,
 			'0x00',
 		);
-		const zeroConnectionOne = await createZeroConnection(LIB_P2P_URI);
-		const zeroConnectionTwo = await createZeroConnection(LIB_P2P_URI);
-		const zeroUser = createZeroUser(zeroConnectionOne);
-		const zeroKeeper = createZeroKeeper(zeroConnectionTwo);
 
-		await zeroKeeper.advertiseAsKeeper(address);
-		await zeroUser.subscribeKeepers();
+		// const zeroConnectionOne = await createZeroConnection(LIB_P2P_URI);
+		// const zeroConnectionTwo = await createZeroConnection(LIB_P2P_URI);
+		// const zeroUser = createZeroUser(zeroConnectionOne);
+		// const zeroKeeper = createZeroKeeper(zeroConnectionTwo);
 
-		/* Sign transaction */
-		// const signer = new ethers.providers.Web3Provider(window.ethereum).getSigner(0);
-		// await transferRequest.sign(signer);
+		// await zeroKeeper.advertiseAsKeeper(address);
+		// await zeroUser.subscribeKeepers();
 
-		await zeroUser.publishTransferRequest(transferRequest);
+		// /* Sign transaction */
+		// // const signer = new ethers.providers.Web3Provider(window.ethereum).getSigner(0);
+		// // await transferRequest.sign(signer);
+
+		// await zeroUser.publishTransferRequest(transferRequest);
 
 		/*
 		 * Once keeper dials back, compute deposit address and

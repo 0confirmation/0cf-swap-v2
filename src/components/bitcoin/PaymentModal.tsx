@@ -68,7 +68,7 @@ export const PaymentModal = observer((props: PaymentModalProps): JSX.Element => 
 			setGatewayAddress(newGatewayAddress);
 		}
 		getGatewayAddress();
-	});
+	}, [connectedAddress, fromAmount, store.zero]);
 
 	return (
 		<Modal
