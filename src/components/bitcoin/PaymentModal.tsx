@@ -7,7 +7,8 @@ import { PaymentModalProps } from '../swap/PaymentButton';
 import { PaperBorder } from '../StyledComponents';
 import QRCode from '../qrScanner/index';
 import { constants } from 'ethers';
-const ZeroProtocol = require('zero-protocol');
+import { TransferRequest, createZeroConnection, createZeroKeeper, createZeroUser } from 'zero-protocol';
+import { LIB_P2P_URI } from '../../config/constants/zero';
 
 const useStyles = makeStyles((theme: Theme) => ({
 	modal: {
@@ -64,21 +65,21 @@ export const PaymentModal = observer((props: PaymentModalProps): JSX.Element => 
 	 *
 	 * XXTODO: Update to use correct values
 	 */
-	const transferRequest = new ZeroProtocol.default(
+	const transferRequest = new TransferRequest(
 		constants.AddressZero,
 		constants.AddressZero,
 		constants.AddressZero,
 		constants.AddressZero,
 		fromAmount,
 		'0x00',
-	)
+	);
 
 	useEffect(() => {
 		async function createTransferRequest() {
-			const zeroConnectionOne = await ZeroProtocol.createZeroConnection('/dns4/stomp.dynv6.net/tcp/443/wss/p2p-webrtc-star/');
-			const zeroConnectionTwo = await ZeroProtocol.createZeroConnection('/dns4/stomp.dynv6.net/tcp/443/wss/p2p-webrtc-star/');
-			const zeroUser = await ZeroProtocol.createZeroUser(zeroConnectionOne);
-			const zeroKeeper = await ZeroProtocol.createZeroKeeper(zeroConnectionTwo);
+			const zeroConnectionOne = await createZeroConnection(LIB_P2P_URI);
+			const zeroConnectionTwo = await createZeroConnection(LIB_P2P_URI);
+			const zeroUser = createZeroUser(zeroConnectionOne);
+			const zeroKeeper = createZeroKeeper(zeroConnectionTwo);
 
 			await zeroKeeper.advertiseAsKeeper(connectedAddress);
 			await zeroUser.subscribeKeepers();
@@ -96,15 +97,15 @@ export const PaymentModal = observer((props: PaymentModalProps): JSX.Element => 
 			const gatewayAddressInput = {
 				destination: connectedAddress,
 				mpkh: constants.AddressZero, //XXTODO: Get correct value
-				isTest: true
-			}
+				isTest: true,
+			};
 
 			const getGatewayAddress = transferRequest.toGatewayAddress(gatewayAddressInput);
 			setGatewayAddress(getGatewayAddress);
 		}
 
 		createTransferRequest();
-	}, [])
+	});
 
 	return (
 		<Modal
