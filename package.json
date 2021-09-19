@@ -73,6 +73,7 @@
 		]
 	},
 	"devDependencies": {
+		"eslint-config-react-app": "^6.0.0",
 		"ts-jest": "^27.0.3"
 	}
 }
