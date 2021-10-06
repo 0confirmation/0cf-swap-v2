@@ -3,7 +3,11 @@ import type { Store } from './Store';
 import type { KeeperList } from '../config/models/zero';
 import { LIB_P2P_URI } from '../config/constants/zero';
 import { constants } from 'ethers';
-import TransferRequest, { createZeroConnection, createZeroKeeper, createZeroUser } from 'zero-protocol';
+import { ethers } from 'ethers';
+import { SignerWithAddress } from 'hardhat-deploy-ethers/dist/src/signers';
+import {TransferRequest, createZeroConnection, createZeroKeeper, createZeroUser } from 'zero-protocol';
+
+declare const window: any;
 
 export default class ZeroStore {
 	private readonly store!: Store;
@@ -31,19 +35,20 @@ export default class ZeroStore {
 			'0x00',
 		);
 
-		// const zeroConnectionOne = await createZeroConnection(LIB_P2P_URI);
-		// const zeroConnectionTwo = await createZeroConnection(LIB_P2P_URI);
-		// const zeroUser = createZeroUser(zeroConnectionOne);
-		// const zeroKeeper = createZeroKeeper(zeroConnectionTwo);
+		const zeroConnectionOne = await createZeroConnection(LIB_P2P_URI);
+		const zeroConnectionTwo = await createZeroConnection(LIB_P2P_URI);
+		const zeroUser = createZeroUser(zeroConnectionOne);
+		const zeroKeeper = createZeroKeeper(zeroConnectionTwo);
 
-		// await zeroKeeper.advertiseAsKeeper(address);
-		// await zeroUser.subscribeKeepers();
+		await zeroKeeper.advertiseAsKeeper(address);
+		await zeroUser.subscribeKeepers();
 
-		// /* Sign transaction */
-		// // const signer = new ethers.providers.Web3Provider(window.ethereum).getSigner(0);
-		// // await transferRequest.sign(signer);
+		/* Sign transaction */
+		const signer = new ethers.providers.Web3Provider(window.ethereum).getSigner(0);
+		const signerWithAddress = SignerWithAddress.create(signer);
+		await transferRequest.sign(signerWithAddress, '0x8322D8a9851f8a09193529B365c35553570E5921');
 
-		// await zeroUser.publishTransferRequest(transferRequest);
+		await zeroUser.publishTransferRequest(transferRequest);
 
 		/*
 		 * Once keeper dials back, compute deposit address and
