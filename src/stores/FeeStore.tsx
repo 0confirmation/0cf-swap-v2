@@ -5,6 +5,10 @@ import { FeeDescription, RenFees } from '../config/models/currency';
 import { SUPPORTED_TOKEN_NAMES } from '../config/constants/tokens';
 import { cancelInterval } from '../utils/helpers';
 import { Bitcoin } from '@renproject/chains-bitcoin';
+const ethers = require('ethers');
+const utils = require('ethers').utils;
+
+const { createGetGasPrice } = require('ethers-polygongastracker');
 
 export default class FeeStore {
 	private readonly store!: Store;
@@ -31,21 +35,21 @@ export default class FeeStore {
 	/* ETH gas prices based on https://gasnow.org/
 	 */
 	private async getGasPrices(): Promise<FeeDescription | null> {
-		const gasEndpoint = this.store.wallet.network.gasEndpoint;
-		const gasSpeed = this.store.wallet.network.gasSpeed;
-		const gasMultiplier = this.store.wallet.network.gasMultiplier;
-
 		const baseCurrency = this.store.wallet.network.baseCurrency;
-		const prices = gasEndpoint ? await fetch(gasEndpoint) : null;
-
 		let gasGwei = new BigNumber(5);
 		const gasEstimate = new BigNumber(6e5);
 
-		if (prices && gasSpeed) {
-			const result = await prices.json();
-			const data = result.data ?? result;
-			gasGwei = new BigNumber(data[gasSpeed]).multipliedBy(gasMultiplier);
+		/*
+		 * Override ethers provider getGasPrice function
+		 * when using the Polygon
+		 */
+		const provider = this.store.wallet.provider;
+		if (provider) {
+			provider.getGasPrice = createGetGasPrice('rapid');
+			const polygonPrice = await provider.getGasPrice();
+			gasGwei = new BigNumber(polygonPrice.toNumber());
 		}
+
 		const ethGasFee = new BigNumber(gasEstimate).multipliedBy(gasGwei).dividedBy(1e18);
 		const btcGasFee = this.store.currency.toToken(
 			ethGasFee,

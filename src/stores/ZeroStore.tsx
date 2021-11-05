@@ -5,7 +5,7 @@ import { LIB_P2P_URI } from '../config/constants/zero';
 import { constants } from 'ethers';
 import { ethers } from 'ethers';
 import { SignerWithAddress } from 'hardhat-deploy-ethers/dist/src/signers';
-import TransferRequest, {createZeroConnection, createZeroKeeper, createZeroUser } from 'zero-protocol';
+import { TransferRequest, createZeroConnection, createZeroKeeper, createZeroUser } from 'zero-protocol';
 
 declare const window: any;
 
@@ -26,7 +26,12 @@ export default class ZeroStore {
 	 * Zero network.
 	 */
 	public createTransferRequest = async (address: string, fromAmount: string): Promise<string> => {
-		const transferRequest = new TransferRequest(
+		const connection = await createZeroConnection(LIB_P2P_URI);
+		const user = await createZeroUser(connection);
+
+		await user.subscribeKeepers()
+
+		const request = new TransferRequest(
 			constants.AddressZero,
 			constants.AddressZero,
 			constants.AddressZero,
@@ -35,34 +40,27 @@ export default class ZeroStore {
 			'0x00',
 		);
 
-		/* Sign transaction */
+		// /* Sign transaction */
 		const signer = new ethers.providers.Web3Provider(window.ethereum).getSigner();
 		const signerWithAddress = await SignerWithAddress.create(signer);
-		await transferRequest.sign(signerWithAddress, '0x8322D8a9851f8a09193529B365c35553570E5921');
+		await request.sign(signerWithAddress, '0x8322D8a9851f8a09193529B365c35553570E5921');
 
-		const zeroConnectionOne = await createZeroConnection(LIB_P2P_URI);
-		const zeroConnectionTwo = await createZeroConnection(LIB_P2P_URI);
-		const zeroUser = createZeroUser(zeroConnectionOne);
-		const zeroKeeper = createZeroKeeper(zeroConnectionTwo);
-
-		await zeroKeeper.advertiseAsKeeper(address);
-		await zeroUser.subscribeKeepers();
-
-		await zeroUser.publishTransferRequest(transferRequest)
+		user.publishTransferRequest(request)
 
 		/*
 		 * Once keeper dials back, compute deposit address and
 		 * display it
 		 */
-		let gatewayAddressInput = {};
-		if (zeroUser.keepers.length > 0) {
-			gatewayAddressInput = {
+		if (user.keepers.length > 0) {
+			const gatewayAddressInput = {
 				destination: address,
 				mpkh: constants.AddressZero, //XXTODO: Make sure this is correct value
 				isTest: true,
 			};
+
+			return request.toGatewayAddress(gatewayAddressInput);
 		}
 
-		return transferRequest.toGatewayAddress(gatewayAddressInput);
+		return '';
 	};
 }
