@@ -1,4 +1,4 @@
-import { createMuiTheme } from '@material-ui/core';
+import { createTheme } from '@material-ui/core';
 
 const fontFamily = [
 	'IBM Plex Sans',
@@ -9,7 +9,7 @@ const fontFamily = [
 	'"Segoe UI Symbol"',
 ].join(',');
 
-export const sushiTheme = createMuiTheme({
+export const sushiTheme = createTheme({
 	typography: {
 		fontFamily: fontFamily,
 		button: {

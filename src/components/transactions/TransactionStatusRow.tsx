@@ -24,7 +24,7 @@ const TransactionStatusRow = observer((props: TransactionStatusRowProps) => {
 	const { complete, statusText } = props;
 
 	return (
-		<Grid container direction="row" justify="center">
+		<Grid container direction="row" justifyContent="center">
 			<Grid item xs={2}>
 				<img src={complete ? completeIcon : incompleteIcon} alt="" />
 			</Grid>

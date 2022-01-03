@@ -80,7 +80,7 @@ export const StatsDisplay = observer(() => {
 			<Grid container direction="row">
 				<Grid item xs={6}></Grid>
 				<Grid item xs={6}>
-					<Grid container direction="row" justify="space-between" alignItems="flex-end">
+					<Grid container direction="row" justifyContent="space-between" alignItems="flex-end">
 						<Grid item xs={4}>
 							<Typography variant="h6" className={classes.statHeader}>
 								BTC
@@ -99,7 +99,7 @@ export const StatsDisplay = observer(() => {
 					<Typography className={classes.statDescription}>Time For 6 Confirmations</Typography>
 				</Grid>
 				<Grid item xs={6}>
-					<Grid container direction="row" justify="space-between" className={classes.statInfoRow}>
+					<Grid container direction="row" justifyContent="space-between" className={classes.statInfoRow}>
 						<Grid item xs={4}>
 							<Typography className={classes.statText}>{btcConfirmationTime} minutes</Typography>
 						</Grid>
@@ -115,7 +115,7 @@ export const StatsDisplay = observer(() => {
 					<Typography className={classes.statDescription}>Time Slippage</Typography>
 				</Grid>
 				<Grid item xs={6}>
-					<Grid container direction="row" justify="space-between" className={classes.statInfoRow}>
+					<Grid container direction="row" justifyContent="space-between" className={classes.statInfoRow}>
 						<Grid item xs={4}>
 							<Typography className={classes.statText}>
 								{_getPercentDifference(btcPriceHistory)}%
@@ -134,7 +134,7 @@ export const StatsDisplay = observer(() => {
 					<Typography className={classes.subDescription}>(vs. ~{btcConfirmationTime} mins ago)</Typography>
 				</Grid>
 				<Grid item xs={6}>
-					<Grid container direction="row" justify="space-between" className={classes.statInfoRow}>
+					<Grid container direction="row" justifyContent="space-between" className={classes.statInfoRow}>
 						<Grid item xs={4}>
 							<Typography className={classes.statText}>{_getValueDifference(btcPriceHistory)}</Typography>
 						</Grid>

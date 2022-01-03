@@ -133,7 +133,7 @@ export const TransactionDetails = observer((props: TransactionDetailsProps) => {
 				<PaperBorder className={classes.border}>
 					<Paper className={classes.transactionDetailsPaper}>
 						<Typography variant="h5">Transaction Details</Typography>
-						<Grid container direction="row" justify="space-between">
+						<Grid container direction="row" justifyContent="space-between">
 							<Grid item xs={6} md={5}>
 								<TransactionDetailsPaper {...fromProps} />
 							</Grid>
@@ -141,29 +141,29 @@ export const TransactionDetails = observer((props: TransactionDetailsProps) => {
 								<TransactionDetailsPaper {...toProps} />
 							</Grid>
 						</Grid>
-						<Grid container direction="column" justify="center">
-							<Grid container direction="row" justify="center">
+						<Grid container direction="column" justifyContent="center">
+							<Grid container direction="row" justifyContent="center">
 								<TransactionStatusRow
 									complete={status >= 0}
 									statusText="Initializing Transaction Found"
 								/>
 							</Grid>
-							<Grid container direction="row" justify="center">
+							<Grid container direction="row" justifyContent="center">
 								<TransactionStatusRow complete={status >= 1} statusText="Liquidity Request Created" />
 							</Grid>
-							<Grid container direction="row" justify="center">
+							<Grid container direction="row" justifyContent="center">
 								<TransactionStatusRow
 									complete={status >= 2}
 									statusText="Liquidity Request Found By Keeper"
 								/>
 							</Grid>
-							<Grid container direction="row" justify="center">
+							<Grid container direction="row" justifyContent="center">
 								<TransactionStatusRow
 									complete={status >= 3}
 									statusText="Swap Complete - Pending Confirmation"
 								/>
 							</Grid>
-							<Grid container direction="row" justify="center">
+							<Grid container direction="row" justifyContent="center">
 								<TransactionStatusRow complete={status >= 4} statusText="Funds Released" />
 							</Grid>
 						</Grid>

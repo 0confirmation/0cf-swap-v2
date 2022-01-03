@@ -22,7 +22,7 @@ const TransactionDetailsPaperRow = observer((props: TransactionDetailsPaperRowPr
 	const { content, description } = props;
 
 	return (
-		<Grid container direction="row" justify="space-between">
+		<Grid container direction="row" justifyContent="space-between">
 			<Typography className={classes.transactionText}>{description}</Typography>
 			<Typography className={classes.transactionText}>{content}</Typography>
 		</Grid>

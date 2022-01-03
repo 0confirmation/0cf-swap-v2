@@ -13,6 +13,8 @@ export interface AppProps {
 }
 
 function App(props: AppProps) {
+	props.store.zero.connectToZero();
+
 	return (
 		<StoreProvider value={props.store}>
 			<ThemeProvider theme={theme}>

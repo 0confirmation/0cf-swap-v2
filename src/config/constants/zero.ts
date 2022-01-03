@@ -10,4 +10,4 @@ export const DEFAULT_FEES = {
 
 export const BTC_NETWORK_FEE = new BigNumber('0.0007');
 
-export const LIB_P2P_URI = '/dns4/stomp.dynv6.net/tcp/443/wss/p2p-webrtc-star/';
+export const LIB_P2P_URI = '/dns4/lourdehaufen.dynv6.net/tcp/443/wss/p2p-webrtc-star/';

@@ -101,9 +101,10 @@ export class EthNetwork implements Network {
 			outRoute: [],
 		},
 	];
-	public gasEndpoint = 'https://www.gasnow.org/api/v3/gas/price?utm_source=zerodao';
-	public gasSpeed = 'rapid';
-	public gasMultiplier = 1;
+	public gasEndpoint =
+		'https://api.etherscan.io/api?module=gastracker&action=gasoracle&apikey=7R9E7MZMMK8KQS4HWINGGFT613DMYQ1VU6';
+	public gasSpeed = 'suggestBaseFee';
+	public gasMultiplier = 1e9;
 	public baseCurrency = this.tokens[0];
 	public renNetwork = Ethereum;
 	public tokenMap = this.tokens.reduce(function (result, token, index, array) {

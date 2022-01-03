@@ -98,7 +98,7 @@ export const PaymentModal = observer((props: PaymentModalProps): JSX.Element => 
 								Expected Price Impact: <b>{priceImpact}%</b>
 							</Typography>
 						</div>
-						<Grid container direction="row" justify="space-between">
+						<Grid container direction="row" justifyContent="space-between">
 							<Grid item xs={12} md={3} className={classes.qrCode}>
 								{/* TODO: Generate QR based on address from renVM */}
 								<QRCode
@@ -112,7 +112,7 @@ export const PaymentModal = observer((props: PaymentModalProps): JSX.Element => 
 								<Grid
 									container
 									direction="column"
-									justify="center"
+									justifyContent="center"
 									className={classes.paymentInfoContainer}
 								>
 									<Paper variant="outlined" className={classes.paymentInfoPaper}>
@@ -129,7 +129,7 @@ export const PaymentModal = observer((props: PaymentModalProps): JSX.Element => 
 								</Grid>
 							</Grid>
 						</Grid>
-						<Grid container justify="center">
+						<Grid container justifyContent="center">
 							<Button variant="outlined" className={classes.paymentIndicator}>
 								AWAITING PAYMENT
 							</Button>

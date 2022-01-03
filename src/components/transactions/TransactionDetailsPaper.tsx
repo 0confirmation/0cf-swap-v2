@@ -71,7 +71,7 @@ export const TransactionDetailsPaper = observer((props: TransactionDetailsPaperP
 
 	return (
 		<Paper variant="outlined" className={classes.transactionPaper}>
-			<Grid container direction="column" justify="flex-start" className={classes.transactionHeader}>
+			<Grid container direction="column" justifyContent="flex-start" className={classes.transactionHeader}>
 				<Typography className={classes.transactionText}>{type === 'to' ? 'TO' : 'FROM'}</Typography>
 				<Grid container direction="row">
 					<Icon icon={icon} className={classes.inputIcon} />

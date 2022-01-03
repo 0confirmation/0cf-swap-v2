@@ -19,10 +19,10 @@ export const GasReserve = observer((props: GasReserveProps) => {
 	} = store;
 	const currency = baseCurrency.name.toUpperCase();
 	return (
-		<Grid container justify="center">
+		<Grid container justifyContent="center">
 			<Paper variant="outlined" style={{ padding: '8px', width: '85%' }}>
-				<Grid container direction="row" justify="center">
-					<Grid container direction="row" alignItems="center" justify="center">
+				<Grid container direction="row" justifyContent="center">
+					<Grid container direction="row" alignItems="center" justifyContent="center">
 						<Checkbox size="small" checked={checked} onChange={handleChecked}></Checkbox>
 						<Typography>Reserve some {currency} for gas</Typography>
 					</Grid>

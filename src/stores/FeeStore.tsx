@@ -43,7 +43,7 @@ export default class FeeStore {
 
 		if (prices && gasSpeed) {
 			const result = await prices.json();
-			const data = result.data ?? result;
+			const data = result['result'] ?? result;
 			gasGwei = new BigNumber(data[gasSpeed]).multipliedBy(gasMultiplier);
 		}
 		const ethGasFee = new BigNumber(gasEstimate).multipliedBy(gasGwei).dividedBy(1e18);

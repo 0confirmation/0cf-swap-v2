@@ -67,11 +67,11 @@ const SwapTo = (props: SwapToProps) => {
 	};
 
 	return (
-		<Grid container className={classes.inputContainer} justify="flex-end" direction="column">
+		<Grid container className={classes.inputContainer} justifyContent="flex-end" direction="column">
 			<Typography variant="caption" className={classes.inputDecorationText}>
 				FROM
 			</Typography>
-			<Grid container direction="row" justify="space-between">
+			<Grid container direction="row" justifyContent="space-between">
 				<Grid item xs={5}>
 					<Grid container direction="row" className={classes.inputDisplayContainer}>
 						<Icon icon={btcIcon} className={classes.inputIcon} />

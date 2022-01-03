@@ -15,7 +15,7 @@ export interface PaymentModalProps {
 
 export const PaymentButton = observer((props: PaymentModalProps) => {
 	return (
-		<Grid container justify="center">
+		<Grid container justifyContent="center">
 			<BitcoinPayment {...props} />
 		</Grid>
 	);

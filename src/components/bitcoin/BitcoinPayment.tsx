@@ -26,7 +26,7 @@ export const BitcoinPayment = observer((props: PaymentModalProps): JSX.Element =
 	const store = useContext(StoreContext);
 	const {
 		wallet: { connectedAddress },
-		zero: { keepers },
+		zero: { zeroUser },
 	} = store;
 	const classes = useStyles();
 	const [open, setOpen] = useState(false);
@@ -45,8 +45,10 @@ export const BitcoinPayment = observer((props: PaymentModalProps): JSX.Element =
 
 	const buttonStatus = (): BUTTON_STATUS => {
 		if (process.env.NODE_ENV !== 'production') return BUTTON_STATUS.keeperConnected;
-		if (!!connectedAddress && !!keepers && Object.keys(keepers).length > 0) return BUTTON_STATUS.keeperConnected;
-		else if (!!connectedAddress && (!keepers || Object.keys(keepers).length <= 0)) return BUTTON_STATUS.noKeeper;
+		if (!!connectedAddress && !!zeroUser && !!zeroUser.keepers && Object.keys(zeroUser.keepers).length > 0)
+			return BUTTON_STATUS.keeperConnected;
+		else if (!!connectedAddress && !!zeroUser && (!zeroUser.keepers || Object.keys(zeroUser.keepers).length <= 0))
+			return BUTTON_STATUS.noKeeper;
 		else return BUTTON_STATUS.disconnected;
 	};
 
