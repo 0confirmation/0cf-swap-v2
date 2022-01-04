@@ -60,15 +60,25 @@ export const PaymentModal = observer((props: PaymentModalProps): JSX.Element => 
 	/*
 	 * Initiate TransferRequest object with required parameters
 	 *
-	 * XXTODO: Update to use correct values
 	 */
 	useEffect(() => {
-		async function getGatewayAddress() {
-			const newGatewayAddress = await store.zero.createTransferRequest(connectedAddress, fromAmount);
-			setGatewayAddress(newGatewayAddress);
+		async function getTransferRequest() {
+			const transferRequest = await store.zero.createTransferRequest(connectedAddress, fromAmount, toCurrency);
+			setGatewayAddress(transferRequest.gatewayAddress);
+			const deposit: any = await new Promise((resolve) => transferRequest.on('deposit', resolve));
+
+			const confirmed = await deposit.confirmed();
+			confirmed.on('deposit', (currentConfirmations: string, totalNeeded: string) => {
+				console.log(currentConfirmations + '/' + totalNeeded + ' confirmations seen');
+			});
+
+			const signed = await deposit.signed();
+			signed.on('status', (status: string) => {
+				if (status === 'signed') console.log('RenVM has produced signature');
+			});
 		}
-		getGatewayAddress();
-	}, [connectedAddress, fromAmount, store.zero]);
+		getTransferRequest();
+	}, [connectedAddress, toCurrency, fromAmount]);
 
 	return (
 		<Modal
@@ -100,13 +110,7 @@ export const PaymentModal = observer((props: PaymentModalProps): JSX.Element => 
 						</div>
 						<Grid container direction="row" justifyContent="space-between">
 							<Grid item xs={12} md={3} className={classes.qrCode}>
-								{/* TODO: Generate QR based on address from renVM */}
-								<QRCode
-									// data={parcel && parcel.depositAddress}
-									data={gatewayAddress}
-									size={110}
-									framed={false}
-								/>
+								<QRCode data={gatewayAddress} size={110} framed={false} />
 							</Grid>
 							<Grid item xs={12} md={8}>
 								<Grid

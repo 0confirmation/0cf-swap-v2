@@ -159,11 +159,8 @@ export const valueAfterFees = (
 	decimals = 8,
 	noCommas = false,
 ): string | null => {
-	console.log('test:', currency, amount.toString());
 	const fees = store.fees.getAllFees(store, amount, currency);
-	console.log('fees:', fees?.toString());
 	const finalAmount = amount.minus(fees ?? new BigNumber(0));
-	console.log(finalAmount.toString());
 
 	return noCommas
 		? finalAmount.toFixed(decimals, BigNumber.ROUND_HALF_FLOOR).toString()
