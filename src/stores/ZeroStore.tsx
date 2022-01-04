@@ -1,7 +1,7 @@
 import { extendObservable } from 'mobx';
 import type { Store } from './Store';
 import { LIB_P2P_URI } from '../config/constants/zero';
-import { providers, constants, ethers } from 'ethers';
+import { providers, ethers } from 'ethers';
 import { TransferRequest, createZeroUser, createZeroConnection } from 'zero-protocol/dist/lib/zero.js';
 import { ZeroUser } from 'zero-protocol/dist/lib/p2p';
 // @ts-ignore
