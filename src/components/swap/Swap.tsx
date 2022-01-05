@@ -59,21 +59,6 @@ export const Swap = observer(() => {
 		/* eslint-disable */
 	}, [gasFee, selectedCoin]);
 
-	/* On change of the zero class, check if the user is connected
-	 * if so, set an interval to regularly update the liquidity
-	 * pool holdings.
-	 */
-	// useEffect(() => {
-	// 	const liquidityInterval = setInterval(() => {
-	// 		Promise.all([getLiquidity(zero)]);
-	// 	}, 1000 * 360);
-	// 	if (zero) {
-	// 		Promise.all([getLiquidity(zero)]);
-	// 	} else {
-	// 		clearInterval(liquidityInterval);
-	// 	}
-	// }, [zero]);
-
 	const handleSelectedCoin = async (name: SUPPORTED_TOKEN_NAMES) => {
 		setSelectedCoin(name);
 	};
@@ -109,17 +94,20 @@ export const Swap = observer(() => {
 		const trade = bnAmount.gt(0)
 			? await fetchTrade(store, SUPPORTED_TOKEN_NAMES.WBTC, selectedCoin, bnAmount, TradeType.Out)
 			: undefined;
-
-		if (trade) {
-			const executionAmount = new BigNumber(trade.toFixed(6));
-			const value = valueAfterFees(store, executionAmount, selectedCoin, 4);
-			setPriceImpact('0');
-			value && parseFloat(value) > 0 ? setToAmount(value) : setToAmount('0');
-		} else if (updateSide === 'to') {
-			setPriceImpact('0');
-		} else {
-			setToAmount('0');
-			setPriceImpact('0');
+		try {
+			if (trade) {
+				const executionAmount = new BigNumber(trade.toFixed(6));
+				const value = valueAfterFees(store, executionAmount, selectedCoin, 4);
+				setPriceImpact('0');
+				value && parseFloat(value) > 0 ? setToAmount(value) : setToAmount('0');
+			} else if (updateSide === 'to') {
+				setPriceImpact('0');
+			} else {
+				setToAmount('0');
+				setPriceImpact('0');
+			}
+		} catch (e) {
+			console.error('error handling from amount:', e);
 		}
 	};
 

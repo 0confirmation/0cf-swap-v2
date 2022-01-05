@@ -6,6 +6,7 @@ import { observer } from 'mobx-react-lite';
 import { PaymentModalProps } from '../swap/PaymentButton';
 import { PaperBorder } from '../StyledComponents';
 import QRCode from '../qrScanner/index';
+import { storage } from '../../utils/storage';
 
 const useStyles = makeStyles((theme: Theme) => ({
 	modal: {
@@ -41,6 +42,7 @@ const useStyles = makeStyles((theme: Theme) => ({
 		height: '100%',
 	},
 	paymentInfoPaper: {
+		textAlign: 'center',
 		padding: theme.spacing(2, 3, 2, 3),
 	},
 	paymentIndicator: {
@@ -64,10 +66,14 @@ export const PaymentModal = observer((props: PaymentModalProps): JSX.Element => 
 	useEffect(() => {
 		async function getTransferRequest() {
 			const transferRequest = await store.zero.createTransferRequest(connectedAddress, fromAmount, toCurrency);
+
+			storage.set({ ...transferRequest, date: new Date(Date.now()) });
+
 			setGatewayAddress(transferRequest.gatewayAddress);
 			const deposit: any = await new Promise((resolve) => transferRequest.on('deposit', resolve));
 
 			const confirmed = await deposit.confirmed();
+			console.log('confirmed info:', confirmed);
 			confirmed.on('deposit', (currentConfirmations: string, totalNeeded: string) => {
 				console.log(currentConfirmations + '/' + totalNeeded + ' confirmations seen');
 			});
@@ -122,11 +128,23 @@ export const PaymentModal = observer((props: PaymentModalProps): JSX.Element => 
 									<Paper variant="outlined" className={classes.paymentInfoPaper}>
 										<Grid container direction="column">
 											<Typography variant="caption">
-												To complete payment, send {fromAmount} {fromCurrency} to the below
-												address
+												To complete payment, send <b>EXACTLY</b> {fromAmount} {fromCurrency} to
+												the below address
 											</Typography>
 											<Typography variant="caption" color="secondary">
 												{gatewayAddress}
+											</Typography>
+											<Typography
+												variant="caption"
+												style={{ textAlign: 'center', paddingTop: '8px' }}
+											>
+												<b>Sending more or less</b> than {fromAmount} {fromCurrency} will result
+												in
+												<b> unintended consequences</b>.
+											</Typography>
+											<Typography variant="caption" style={{ textAlign: 'center' }}>
+												If you'd like to modify this amount, please close this window and
+												initiate a new request.
 											</Typography>
 										</Grid>
 									</Paper>

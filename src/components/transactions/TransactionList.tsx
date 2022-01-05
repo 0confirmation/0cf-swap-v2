@@ -1,4 +1,4 @@
-import React, { useContext } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import { observer } from 'mobx-react-lite';
 import { Container, Grid, Paper, Typography } from '@material-ui/core';
 import { MainContainer, PaperContainer } from '../common/Styles';
@@ -6,6 +6,8 @@ import { Theme, makeStyles } from '@material-ui/core/styles';
 import { StoreContext } from '../../stores/Store';
 import TransactionRow from './TransactionRow';
 import { TRANSACTION_STATUS } from '../../config/constants/ui';
+import { storage } from '../../utils/storage';
+import { TransferRequestWithStatus } from 'zero-protocol/dist/lib/persistence/types';
 
 const useStyles = makeStyles((theme: Theme) => ({
 	txPaper: {
@@ -40,6 +42,18 @@ export const TransactionList = observer(() => {
 		wallet: { connectedAddress },
 	} = store;
 	const classes = useStyles();
+
+	const [transfers, setTransfers] = useState<TransferRequestWithStatus[]>();
+
+	const getAllTransfers = async () => {
+		setTransfers(await storage.getAllTransferRequests());
+	};
+
+	useEffect(() => {
+		getAllTransfers();
+	}, [connectedAddress]);
+
+	console.log('transfers:', transfers);
 
 	return (
 		<MainContainer>
