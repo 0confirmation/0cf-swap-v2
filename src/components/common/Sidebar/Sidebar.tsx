@@ -57,12 +57,12 @@ const secondarySidebarLinks = [
 		disabled: false,
 	},
 	{
-		title: '0confirmation',
+		title: 'ZeroDAO',
 		view: undefined,
-		url: 'https://0confirmation.com/',
+		url: 'https://zerodao.com/',
 		disabled: false,
 	},
-	{ title: 'Docs', view: undefined, url: 'https://docs.0confirmation.com/', disabled: false },
+	{ title: 'Docs', view: undefined, url: 'https://docs.zerodao.com/', disabled: false },
 	//TODO: Make contact dropdown with socials links
 	{ title: 'Contact', view: undefined, url: '_blank', disabled: true },
 ];

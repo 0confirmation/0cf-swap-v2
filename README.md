@@ -4,7 +4,7 @@ The Zero Swap app is a PoC showing the power of the Zero Swap protocol, enabling
 
 -   Website: [zerodao.com](https://zerodao.com/)
 -   Docs: [docs.zerodao.com](https://docs.zerodao.com/)
--   Interface: [swap.zerodao.com](https://swap.zerodao.com/)
+-   Interface: [dev-app.zerodao.com](https://dev-app.zerodao.com/) - PoC Skeleton App, not production
 -   Discord: [zeroDAO](https://discord.gg/AngYhkW3H5)
 
 ## Contributing
